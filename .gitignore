@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# Venv
+.venv/
+
+# Env files
+.env
+*.env
+
+# Flask / Instance
+instance/
+
+# IDE
+.vscode/
+.idea/
