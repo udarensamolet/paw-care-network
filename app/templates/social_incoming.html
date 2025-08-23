@@ -1,0 +1,25 @@
+{% extends "_layout.html" %}
+{% block content %}
+<h1>Incoming requests</h1>
+{% if requests %}
+  <ul>
+    {% for r in requests %}
+      <li>
+        From: {{ r.requester_id }}
+        {% set accept_form = accept_forms[r.id] %}
+        {% set decline_form = decline_forms[r.id] %}
+        <form method="post" action="{{ url_for('social.incoming_accept', fid=r.id) }}" style="display:inline">
+          {{ accept_form.csrf_token }}
+          <button type="submit">{{ accept_form.submit.label.text }}</button>
+        </form>
+        <form method="post" action="{{ url_for('social.incoming_decline', fid=r.id) }}" style="display:inline">
+          {{ decline_form.csrf_token }}
+          <button type="submit">{{ decline_form.submit.label.text }}</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No incoming requests.</p>
+{% endif %}
+{% endblock %}

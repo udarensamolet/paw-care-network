@@ -1,0 +1,24 @@
+{% extends "_layout.html" %}
+{% block content %}
+<h1>Find friends</h1>
+<form method="post" novalidate>
+  {{ form.csrf_token }}
+  <label>{{ form.q.label }} {{ form.q(size=40) }}</label>
+  <button type="submit">{{ form.submit.label.text }}</button>
+</form>
+
+{% if results %}
+  <h2>Results</h2>
+  <ul>
+    {% for u in results %}
+      <li>
+        {{ u.name }} ({{ u.email }})
+        <form method="post" action="{{ url_for('social.send_request', user_id=u.id) }}" style="display:inline">
+          {{ send_forms[u.id].csrf_token }}
+          <button type="submit">{{ send_forms[u.id].submit.label.text }}</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}
