@@ -14,12 +14,16 @@ def create_app():
 
     from .models.user import User
     from .models.social import Friendship
+    from .models.pet import Pet
 
     from .auth.routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     from .social.routes import social_bp
     app.register_blueprint(social_bp, url_prefix="/social")
+
+    from .pets.routes import pets_bp
+    app.register_blueprint(pets_bp)
 
     @app.get("/")
     def index():
