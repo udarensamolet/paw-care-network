@@ -1,0 +1,16 @@
+{% extends "_layout.html" %}
+{% block content %}
+<h1>{{ 'Add Pet' if mode == 'create' else 'Edit Pet' }}</h1>
+<form method="post" novalidate>
+  {{ form.csrf_token }}
+  <label>Name {{ form.name(size=40) }}</label>
+  <label>Species {{ form.species(size=40) }}</label>
+  <label>Breed {{ form.breed(size=40) }}</label>
+  <label>Age (years) {{ form.age(min=0) }}</label>
+  <label>Photo URL {{ form.photo_url(size=60) }}</label>
+  <label>Care instructions {{ form.care_instructions(rows=4, cols=60) }}</label>
+  <label>Notes {{ form.notes(rows=3, cols=60) }}</label>
+  <button type="submit">{{ form.submit.label.text }}</button>
+</form>
+<p><a href="{{ url_for('pets.list_pets') }}">Back to list</a></p>
+{% endblock %}
