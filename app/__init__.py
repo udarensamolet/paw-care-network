@@ -30,6 +30,11 @@ def create_app():
     @app.get("/dashboard")
     @login_required
     def dashboard():
-        return render_template("dashboard.html", user=current_user)
+        return render_template_string(
+            "<h1>Welcome, {{ user.name }}!</h1>"
+            "<p>Email: {{ user.email }}</p>"
+            '<p><a href="{{ url_for("auth.logout") }}">Logout</a></p>',
+            user=current_user,
+        )
 
     return app
