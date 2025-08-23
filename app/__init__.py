@@ -21,6 +21,8 @@ def create_app():
     from .social.routes import social_bp
     app.register_blueprint(social_bp, url_prefix="/social")
 
+    from .models.pet import Pet
+
     @app.get("/")
     def index():
         if current_user.is_authenticated:
