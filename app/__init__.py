@@ -21,7 +21,8 @@ def create_app():
     from .social.routes import social_bp
     app.register_blueprint(social_bp, url_prefix="/social")
 
-    from .models.pet import Pet
+    from .pets.routes import pets_bp
+    app.register_blueprint(pets_bp)
 
     @app.get("/")
     def index():
