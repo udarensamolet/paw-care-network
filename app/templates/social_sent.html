@@ -1,0 +1,13 @@
+{% extends "_layout.html" %}
+{% block content %}
+<h1>Sent requests</h1>
+{% if requests %}
+  <ul>
+    {% for r in requests %}
+      <li>To: {{ r.addressee_id }} (pending)</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No sent requests.</p>
+{% endif %}
+{% endblock %}
