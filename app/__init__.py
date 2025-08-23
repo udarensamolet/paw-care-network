@@ -13,6 +13,7 @@ def create_app():
     login_manager.login_message_category = "info"
 
     from .models.user import User
+    from .models.social import Friendship
 
     from .auth.routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
