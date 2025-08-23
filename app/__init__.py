@@ -30,8 +30,6 @@ def create_app():
     @app.get("/dashboard")
     @login_required
     def dashboard():
-        return render_template_string(
-            "dashboard.html", user=current_user
-        )
+        return render_template("dashboard.html", user=current_user)
 
     return app
