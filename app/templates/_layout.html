@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Paw Care Network</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; }
+    form { max-width: 420px; }
+    label { display:block; margin-top: 0.75rem; }
+    input[type="text"], input[type="email"], input[type="password"] { width:100%; padding:0.5rem; }
+    button { margin-top:1rem; padding:0.5rem 1rem; }
+    .flash { padding:0.5rem 0; }
+  </style>
+</head>
+<body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div>
+        {% for category, msg in messages %}
+          <div class="flash">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <nav>
+    <a href="{{ url_for('auth.register') }}">Register</a> |
+    <a href="{{ url_for('auth.login') }}">Login</a> |
+    <a href="{{ url_for('dashboard') }}">Dashboard</a> |
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+  </nav>
+  <hr>
+  {% block content %}{% endblock %}
+</body>
+</html>
