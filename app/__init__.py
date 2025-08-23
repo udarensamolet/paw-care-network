@@ -18,6 +18,9 @@ def create_app():
     from .auth.routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
+    from .social.routes import social_bp
+    app.register_blueprint(social_bp, url_prefix="/social")
+
     @app.get("/")
     def index():
         if current_user.is_authenticated:
