@@ -1,0 +1,14 @@
+{% extends "_layout.html" %}
+{% block content %}
+<h1>Create account</h1>
+<form method="post" novalidate>
+  {{ form.csrf_token }}
+  <label>Name {{ form.name(size=32) }}</label>
+  <label>Email {{ form.email(type="email") }}</label>
+  <label>Password {{ form.password(type="password") }}</label>
+  <label>{{ form.is_owner() }} I am an Owner</label>
+  <label>{{ form.is_sitter() }} I am a Sitter</label>
+  <button type="submit">{{ form.submit.label.text }}</button>
+</form>
+<p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+{% endblock %}
