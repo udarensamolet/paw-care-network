@@ -14,6 +14,7 @@ def create_app():
 
     from .models.user import User
     from .models.social import Friendship
+    from .models.pet import Pet
 
     from .auth.routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
