@@ -1,32 +1,59 @@
 {% extends "_layout.html" %}
 {% block content %}
-<h1>Your Pets</h1>
+<div class="container">
 
-<p><a href="{{ url_for('pets.create_pet') }}">+ Add new pet</a></p>
+    <div class="card" style="max-width:1100px">
+        <div class="pets-header">
+            <h1 style="margin:0;color:var(--blue)">Your Pets</h1>
+            <a class="btn" href="{{ url_for('pets.create_pet') }}">+ Add new pet</a>
+        </div>
 
-{% if pets %}
-<ul>
-    {% for p in pets %}
-    <li>
-        <strong>{{ p.name }}</strong>
-        {% if p.photo_url %}
-        <img src="{{ p.photo_url }}" alt="{{ p.name }}"
-            style="max-width:120px; max-height:120px; object-fit:cover; border-radius:8px; vertical-align:middle;"
-            onerror="this.style.display='none'">
+        {% if pets %}
+        <div class="pets-grid">
+            {% for pet in pets %}
+            <div class="pet-card">
+                <div class="pet-photo">
+                    {% if pet.photo_url %}
+                    {% if pet.photo_url.startswith('http') %}
+                    <img src="{{ pet.photo_url }}" alt="{{ pet.name }}"
+                        onerror="this.parentElement.textContent='{{ pet.name[:1]|upper }}'">
+                    {% else %}
+                    <img src="{{ url_for('static', filename=pet.photo_url.lstrip('/static/')) }}" alt="{{ pet.name }}"
+                        onerror="this.parentElement.textContent='{{ pet.name[:1]|upper }}'">
+                    {% endif %}
+                    {% else %}
+                    {{ pet.name[:1]|upper }}
+                    {% endif %}
+                </div>
+
+                <div class="pet-meta">
+                    <h3>{{ pet.name }}</h3>
+                    <div class="muted">
+                        {{ pet.species }}{% if pet.breed %} ({{ pet.breed }}){% endif %}
+                        {% if pet.age is not none %} — {{ pet.age }} yrs{% endif %}
+                    </div>
+
+                    {% if pet.care_instructions %}
+                    <div class="help" style="margin-top:6px; max-width:60ch;">
+                        {{ pet.care_instructions }}
+                    </div>
+                    {% endif %}
+
+                    <div class="pet-actions">
+                        <a class="btn outline" href="{{ url_for('pets.edit_pet', pet_id=pet.id) }}">Edit</a>
+                        <form method="post" action="{{ url_for('pets.delete_pet', pet_id=pet.id) }}"
+                            onsubmit="return confirm('Delete {{ pet.name }}?');">
+                            <button class="btn" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="help">You haven’t added any pets yet.</p>
         {% endif %}
-        {% if p.species %} – {{ p.species }}{% endif %}
-        {% if p.breed %} ({{ p.breed }}){% endif %}
-        {% if p.age is not none %} – {{ p.age }} yrs{% endif %}
-        |
-        <a href="{{ url_for('pets.edit_pet', pet_id=p.id) }}">Edit</a>
-        <form method="post" action="{{ url_for('pets.delete_pet', pet_id=p.id) }}" style="display:inline"
-            onsubmit="return confirm('Delete this pet?');">
-            <button type="submit">Delete</button>
-        </form>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No pets yet.</p>
-{% endif %}
+    </div>
+
+</div>
 {% endblock %}
