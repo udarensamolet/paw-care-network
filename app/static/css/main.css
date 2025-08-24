@@ -214,73 +214,11 @@ body {
     text-align: center
 }
 
-.flash-wrap {
-    max-width: 520px;
-    margin: 12px auto;
-    padding: 0 8px
-}
-
-.flash {
-    position: relative;
-    background: #fff;
-    border-left: 4px solid var(--turquoise);
-    padding: 10px 12px 10px 14px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-    margin-bottom: 8px;
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity .35s ease, transform .35s ease;
-}
-
-.flash--hidden {
-    opacity: 0;
-    transform: translateY(-6px);
-}
-
-.flash__close {
-    position: absolute;
-    top: 6px;
-    right: 8px;
-    border: 0;
-    background: transparent;
-    font-size: 18px;
-    line-height: 1;
-    color: #64748b;
-    cursor: pointer;
-}
-
-.flash__close:hover {
-    color: #0F172A;
-}
-
-.flash--success {
-    border-left-color: var(--turquoise);
-}
-
-.flash--info {
-    border-left-color: var(--blue);
-}
-
-.flash--warning {
-    border-left-color: #eab308;
-}
-
-/* amber */
-.flash--danger,
-.flash--error {
-    border-left-color: #dc2626;
-}
-
-/* red */
-
-
 .container {
     max-width: 1100px;
     margin: 24px auto;
     padding: 0 16px
 }
-
 
 .grid {
     display: grid;
