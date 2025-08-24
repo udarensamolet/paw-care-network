@@ -29,7 +29,6 @@ def create_app():
     from .models.care import CareRequest
 
     from .schedule.routes import schedule_bp
-
     app.register_blueprint(schedule_bp)
 
     @app.get("/")
