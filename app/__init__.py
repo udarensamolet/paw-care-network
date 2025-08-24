@@ -34,6 +34,9 @@ def create_app():
     from .models.offer import CareOffer 
     from .models.assignment import CareAssignment  
 
+    from .offers.routes import offers_bp
+    app.register_blueprint(offers_bp, url_prefix="")
+
     @app.get("/")
     def index():
         if current_user.is_authenticated:
