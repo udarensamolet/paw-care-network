@@ -1,0 +1,21 @@
+{% extends "_layout.html" %}
+{% block content %}
+<h1>My Offers</h1>
+<ul>
+    {% for o in rows %}
+    <li>
+        Request #{{ o.care_request_id }} — status: {{ o.status }}
+        {% if o.status == 'offered' %}
+        <form method="post" action="{{ url_for('offers.offer_withdraw', offer_id=o.id) }}" style="display:inline"
+            onsubmit="return confirm('Withdraw this offer?');">
+            {{ withdraw_forms[o.id].csrf_token }}
+            <button type="submit">Withdraw</button>
+        </form>
+        {% endif %}
+        {% if o.message %}<div><em>{{ o.message }}</em></div>{% endif %}
+    </li>
+    {% else %}
+    <li>No offers yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

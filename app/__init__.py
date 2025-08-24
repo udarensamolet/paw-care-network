@@ -31,6 +31,15 @@ def create_app():
     from .schedule.routes import schedule_bp
     app.register_blueprint(schedule_bp)
 
+    from .models.offer import CareOffer 
+    from .models.assignment import CareAssignment  
+
+    from .offers.routes import offers_bp
+    app.register_blueprint(offers_bp, url_prefix="")
+
+    from .assignments.routes import assignments_bp
+    app.register_blueprint(assignments_bp, url_prefix="")
+
     @app.get("/")
     def index():
         if current_user.is_authenticated:
