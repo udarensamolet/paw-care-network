@@ -1,39 +1,68 @@
 {% extends "_layout.html" %}
 {% block content %}
 <div class="container">
-  <div class="tile"><h2 style="margin:0;color:var(--blue)">Pending applications</h2></div>
 
-  <div class="tile">
+  <div class="card" style="max-width:1100px">
+    <div class="assignments-header">
+      <h1 style="margin:0;color:var(--blue)">Pending applications</h1>
+      <div class="btn-row">
+        <a class="btn outline" href="{{ url_for('assignments.list_assignments') }}">Back to assignments</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:1100px">
     {% if rows %}
-      <ul class="list">
-        {% for a in rows %}
-          <li>
-            <strong>Request #{{ a.care_request_id }}</strong> |
-            Sitter: #{{ a.sitter_id }} |
-            Proposed: <em>{{ a.start_at }}</em> → <em>{{ a.end_at }}</em>
-            {% if a.sitter_note %}<div class="help">Note: {{ a.sitter_note }}</div>{% endif %}
+    <div class="assignments-grid">
+      {% for a in rows %}
+      <div class="assignment-card">
+        <div class="row">
+          <span class="when">Proposed: {{ a.start_at }} → {{ a.end_at }}</span>
+          <span class="chip pending">Pending</span>
+        </div>
 
-            <form method="post" action="{{ url_for('assignments.approve_assignment', assign_id=a.id) }}" style="display:block;margin-top:8px">
-              {{ approve_forms[a.id].csrf_token }}
-              <div class="grid cols-3">
-                <label class="label">Start {{ approve_forms[a.id].start_at(type="datetime-local", class_="input") }}</label>
-                <label class="label">End   {{ approve_forms[a.id].end_at(type="datetime-local", class_="input") }}</label>
-                <div class="actions" style="align-items:flex-end">
-                  <button class="btn" type="submit">{{ approve_forms[a.id].submit.label.text }}</button>
-                </div>
-              </div>
-            </form>
+        <div class="row">
+          <span class="role-pill">
+            Sitter: {{ friendly_name(a.sitter) or ('#' ~ a.sitter_id) }}
+          </span>
+          {% if a.pet and a.pet.name %}
+          <span class="pet-pill">Pet: {{ a.pet.name }}</span>
+          {% elif a.pet_id %}
+          <span class="pet-pill">Pet #{{ a.pet_id }}</span>
+          {% endif %}
+          <span class="where">• Request #{{ a.care_request_id }}</span>
+        </div>
 
-            <form method="post" action="{{ url_for('assignments.decline_assignment', assign_id=a.id) }}" style="display:inline">
-              {{ decline_forms[a.id].csrf_token }}
-              <button class="btn outline" type="submit">Decline</button>
-            </form>
-          </li>
-        {% endfor %}
-      </ul>
+        {% if a.sitter_note %}
+        <div class="note-block"><strong>Note from sitter:</strong> {{ a.sitter_note }}</div>
+        {% endif %}
+
+        <!-- Approve (edit times) -->
+        <form method="post" action="{{ url_for('assignments.approve_assignment', assign_id=a.id) }}"
+          class="inline-form-grid">
+          {{ approve_forms[a.id].csrf_token }}
+          <label class="label">Start
+            {{ approve_forms[a.id].start_at(type="datetime-local", class_="input") }}
+          </label>
+          <label class="label">End
+            {{ approve_forms[a.id].end_at(type="datetime-local", class_="input") }}
+          </label>
+          <button class="btn" type="submit">{{ approve_forms[a.id].submit.label.text }}</button>
+        </form>
+
+        <!-- Decline -->
+        <form method="post" action="{{ url_for('assignments.decline_assignment', assign_id=a.id) }}"
+          class="assignment-actions">
+          {{ decline_forms[a.id].csrf_token }}
+          <button class="btn outline" type="submit">Decline</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
     {% else %}
-      <p>No pending applications.</p>
+    <p class="help">No pending applications to review.</p>
     {% endif %}
   </div>
+
 </div>
 {% endblock %}

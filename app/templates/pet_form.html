@@ -1,25 +1,130 @@
 {% extends "_layout.html" %}
 {% block content %}
-<h1>{{ 'Add Pet' if mode == 'create' else 'Edit Pet' }}</h1>
-<form method="post" enctype="multipart/form-data" novalidate>
-    {{ form.csrf_token }}
-    <label>Name {{ form.name(size=40) }}</label>
-    <label>Species {{ form.species(size=40) }}</label>
-    <label>Breed {{ form.breed(size=40) }}</label>
-    <label>Age (years) {{ form.age(min=0) }}</label>
+<div class="container">
+    <div class="card" style="max-width:860px">
+        <h1 style="margin-top:0;color:var(--blue)">{{ 'Add new pet' if mode == 'create' else 'Edit pet' }}</h1>
 
-    <label>Photo URL {{ form.photo_url(size=60) }}</label>
-    <label>Upload photo {{ form.photo_file() }}</label>
+        <form method="post" enctype="multipart/form-data" novalidate class="form-grid two-cols" id="petForm">
+            {{ form.csrf_token }}
 
-    <label>Care instructions {{ form.care_instructions(rows=4, cols=60) }}</label>
-    <label>Notes {{ form.notes(rows=3, cols=60) }}</label>
-    <button type="submit">{{ form.submit.label.text }}</button>
-</form>
+            <div class="field">
+                <label>Name</label>
+                {{ form.name(class_="input", placeholder="Simba") }}
+                {% for e in form.name.errors %}<div class="error">{{ e }}</div>{% endfor %}
+            </div>
 
-{% if mode == 'edit' and pet.photo_url %}
-<p>Current photo:</p>
-<img src="{{ pet.photo_url if pet.photo_url.startswith('http') else url_for('static', filename=pet.photo_url.lstrip('/static/')) }}"
-    alt="{{ pet.name }}" style="max-width:200px;border-radius:10px" onerror="this.style.display='none'">
-{% endif %}
-<p><a href="{{ url_for('pets.list_pets') }}">Back to list</a></p>
+            <div class="field">
+                <label>Species</label>
+                {{ form.species(class_="input", placeholder="Cat / Dog / ...") }}
+                {% for e in form.species.errors %}<div class="error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field">
+                <label>Breed</label>
+                {{ form.breed(class_="input", placeholder="Street King") }}
+                {% for e in form.breed.errors %}<div class="error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field">
+                <label>Age (years)</label>
+                {{ form.age(class_="input", min=0, placeholder="3") }}
+                {% for e in form.age.errors %}<div class="error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+                <label>Photo URL (optional)</label>
+                {{ form.photo_url(class_="input", id="photoUrl", placeholder="https://...") }}
+                <div class="help">If both URL and file are provided, the uploaded file will be used.</div>
+                {% for e in form.photo_url.errors %}<div class="error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+                <label>Upload photo (optional)</label>
+                <div class="upload-box">
+                    {{ form.photo_file(id="photoFile") }}
+                    <div class="help">JPG, PNG, GIF — up to 10MB.</div>
+                    <div class="preview">
+                        <img id="photoPreview" alt="Preview">
+                        <span class="help" id="previewHelp">Preview will appear here.</span>
+                    </div>
+                </div>
+                {% for e in form.photo_file.errors %}<div class="error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+                <label>Care instructions</label>
+                {{ form.care_instructions(class_="textarea", rows=4, placeholder="Feeding schedule, meds, quirks...") }}
+                {% for e in form.care_instructions.errors %}<div class="error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+                <label>Notes (optional)</label>
+                {{ form.notes(class_="textarea", rows=3, placeholder="Anything else to know") }}
+                {% for e in form.notes.errors %}<div class="error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div style="grid-column: 1 / -1; display:flex; gap:10px; flex-wrap:wrap; margin-top:6px">
+                <button class="btn" type="submit">{{ form.submit.label.text }}</button>
+                <a class="btn outline" href="{{ url_for('pets.list_pets') }}">Back to list</a>
+            </div>
+        </form>
+
+        {% if mode == 'edit' and pet and pet.photo_url %}
+        <div class="help" style="margin-top:12px">Current saved photo:</div>
+        <img src="{% if pet.photo_url.startswith('http') %}{{ pet.photo_url }}{% else %}{{ url_for('static', filename=pet.photo_url.lstrip('/static/')) }}{% endif %}"
+            alt="{{ pet.name }}" style="max-width:180px;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.15);"
+            onerror="this.style.display='none'">
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    (function () {
+        const urlInput = document.getElementById('photoUrl');
+        const fileInput = document.getElementById('photoFile');
+        const img = document.getElementById('photoPreview');
+        const help = document.getElementById('previewHelp');
+
+        function show(src) {
+            if (!img || !help) return;
+            if (src) {
+                img.src = src;
+                img.style.display = 'block';
+                help.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                help.style.display = 'inline';
+            }
+        }
+
+        if (urlInput) {
+            urlInput.addEventListener('input', () => {
+                const v = urlInput.value.trim();
+                if (v && (v.startsWith('http://') || v.startsWith('https://'))) {
+                    show(v);
+                } else if (!fileInput ?.files ?.length) {
+                    show(null);
+                }
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', () => {
+                const f = fileInput.files && fileInput.files[0];
+                if (!f) {
+                    if (!urlInput.value) show(null);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = e => show(e.target.result);
+                reader.readAsDataURL(f);
+            });
+        }
+
+        if (urlInput && urlInput.value) {
+            const v = urlInput.value.trim();
+            if (v.startsWith('http://') || v.startsWith('https://')) show(v);
+        }
+    })();
+</script>
 {% endblock %}

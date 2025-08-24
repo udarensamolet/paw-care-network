@@ -1,6 +1,7 @@
 from flask import Flask, render_template
-from .extensions import db, migrate, login_manager
+from .extensions import db, migrate, login_manager, csrf
 from flask_login import login_required, current_user
+from datetime import datetime, timezone
 
 
 def create_app():
@@ -14,31 +15,37 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    csrf.init_app(app)
     login_manager.login_view = "auth.login"
 
-
-    from .models.user import User  
-    from .models.social import Friendship  
-    from .models.pet import Pet  
-    from .models.care import CareRequest  
-    from .models.assignment import CareAssignment 
+    from .models.user import User
+    from .models.social import Friendship
+    from .models.pet import Pet
+    from .models.care import CareRequest
+    from .models.assignment import CareAssignment
 
     from .auth.routes import auth_bp
+
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     from .social.routes import social_bp
+
     app.register_blueprint(social_bp, url_prefix="/social")
 
     from .pets.routes import pets_bp
+
     app.register_blueprint(pets_bp)
 
     from .schedule.routes import schedule_bp
+
     app.register_blueprint(schedule_bp)
 
     from .matching.routes import matching_bp
+
     app.register_blueprint(matching_bp)
 
     from .assignments.routes import assignments_bp
+
     app.register_blueprint(assignments_bp)
 
     @app.get("/")
@@ -71,8 +78,10 @@ def create_app():
             "open_requests": CareRequest.query.filter_by(
                 owner_id=current_user.id, status="open"
             ).count(),
-            "sitter_assignments": CareAssignment.query.filter_by(
-                sitter_id=current_user.id
+            "sitter_assignments": CareAssignment.query.filter(
+                CareAssignment.sitter_id == current_user.id,
+                CareAssignment.status == "active",
+                CareAssignment.end_at >= datetime.now(timezone.utc),
             ).count(),
             "friends_open_reqs": (
                 CareRequest.query.filter(
@@ -102,6 +111,29 @@ def create_app():
 
         return render_template(
             "dashboard.html", user=current_user, stats=stats, latest=latest
+        )
+
+    @app.context_processor
+    def inject_helpers():
+        def friendly_name(user):
+            if not user:
+                return ""
+            name = (getattr(user, "name", None) or "").strip()
+            if name:
+                return name
+            email = getattr(user, "email", "") or ""
+            return email.split("@", 1)[0] if email else ""
+
+        def fmt_date(dt):
+            try:
+                return dt.strftime("%Y-%m-%d")  # само дата
+            except Exception:
+                return ""
+
+        return dict(
+            friendly_name=friendly_name,
+            fmt_date=fmt_date,
+            current_year=datetime.now(timezone.utc).year,
         )
 
     return app

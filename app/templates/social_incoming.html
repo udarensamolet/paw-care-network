@@ -1,25 +1,37 @@
 {% extends "_layout.html" %}
 {% block content %}
-<h1>Incoming requests</h1>
-{% if requests %}
-<ul>
-  {% for r in requests %}
-  <li>
-    From: {{ r.requester_id }}
-    {% set accept_form = accept_forms[r.id] %}
-    {% set decline_form = decline_forms[r.id] %}
-    <form method="post" action="{{ url_for('social.incoming_accept', fid=r.id) }}" style="display:inline">
-      {{ accept_form.csrf_token }}
-      <button type="submit">{{ accept_form.submit.label.text }}</button>
-    </form>
-    <form method="post" action="{{ url_for('social.incoming_decline', fid=r.id) }}" style="display:inline">
-      {{ decline_form.csrf_token }}
-      <button type="submit">{{ decline_form.submit.label.text }}</button>
-    </form>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>No incoming requests.</p>
-{% endif %}
+<div class="container">
+  <div class="card" style="max-width:1100px">
+    <h1 style="margin:0;color:var(--blue)">Incoming requests</h1>
+  </div>
+
+  <div class="card" style="max-width:1100px">
+    {% if rows %}
+    <div class="people-grid">
+      {% for row in rows %}
+      {% set u = row.user %}
+      <div class="person-card">
+        <div class="avatar">{{ (u.name or u.email)[:1]|upper }}</div>
+        <div class="person">
+          <h3>{{ u.name or u.email }}</h3>
+          <div class="muted">{{ u.email }}</div>
+          <div class="people-actions">
+            <form method="post" action="{{ url_for('social.accept', user_id=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn" type="submit">Accept</button>
+            </form>
+            <form method="post" action="{{ url_for('social.decline', user_id=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn outline" type="submit">Decline</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="help">No incoming requests.</p>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

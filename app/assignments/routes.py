@@ -12,6 +12,7 @@ from ..models.care import CareRequest
 
 assignments_bp = Blueprint("assignments", __name__, template_folder="../templates")
 
+
 class ApproveForm(FlaskForm):
     start_at = DateTimeLocalField(
         "Start", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
@@ -25,12 +26,14 @@ class ApproveForm(FlaskForm):
 class DeclineForm(FlaskForm):
     submit = SubmitField("Decline")
 
+
 @assignments_bp.route("/assignments", methods=["GET"])
 @login_required
 def list_assignments():
 
     owner_rows = (
         db.session.query(CareAssignment)
+        .options(joinedload(CareAssignment.pet), joinedload(CareAssignment.sitter))
         .join(CareRequest, CareRequest.id == CareAssignment.care_request_id)
         .filter(CareRequest.owner_id == current_user.id)
         .order_by(CareAssignment.start_at.desc())
@@ -38,7 +41,10 @@ def list_assignments():
     )
 
     sitter_rows = (
-        CareAssignment.query.filter_by(sitter_id=current_user.id)
+        CareAssignment.query.options(
+            joinedload(CareAssignment.pet), joinedload(CareAssignment.sitter)
+        )
+        .filter_by(sitter_id=current_user.id)
         .order_by(CareAssignment.start_at.desc())
         .all()
     )
@@ -47,11 +53,13 @@ def list_assignments():
         "assignments_list.html", owner_rows=owner_rows, sitter_rows=sitter_rows
     )
 
+
 @assignments_bp.route("/assignments/review", methods=["GET"])
 @login_required
 def review_list():
     rows = (
         db.session.query(CareAssignment)
+        .options(joinedload(CareAssignment.pet), joinedload(CareAssignment.sitter))
         .join(CareRequest, CareRequest.id == CareAssignment.care_request_id)
         .filter(
             CareRequest.owner_id == current_user.id, CareAssignment.status == "pending"
@@ -59,6 +67,7 @@ def review_list():
         .order_by(CareAssignment.created_at.desc())
         .all()
     )
+
     approve_forms = {}
     decline_forms = {}
     for a in rows:
@@ -73,6 +82,7 @@ def review_list():
         approve_forms=approve_forms,
         decline_forms=decline_forms,
     )
+
 
 @assignments_bp.route("/assignments/<int:assign_id>/approve", methods=["POST"])
 @login_required
@@ -151,6 +161,7 @@ def decline_assignment(assign_id):
     db.session.commit()
     flash("Application declined.", "info")
     return redirect(url_for("assignments.review_list"))
+
 
 @assignments_bp.route("/assignments/<int:assign_id>/cancel", methods=["POST"])
 @login_required

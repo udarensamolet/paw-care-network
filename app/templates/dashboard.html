@@ -51,7 +51,7 @@
     </div>
 
     <div class="tile">
-      <h3>Assignments (as Sitter)</h3>
+      <h3>Assignments</h3>
       <div class="kpi">{{ stats.sitter_assignments }}</div>
       <div class="btn-row">
         <a class="btn outline" href="{{ url_for('assignments.list_assignments') }}">My schedule</a>
@@ -64,7 +64,14 @@
       <h3>Recent requests</h3>
       <ul class="list">
         {% for r in latest.requests %}
-        <li>#{{ r.id }} — {{ r.start_at }} → {{ r.end_at }} — <em>{{ r.status }}</em></li>
+        <li>
+          #{{ r.id }} —
+          {% if r.pet and r.pet.name %}
+          <strong>{{ r.pet.name }}</strong> —
+          {% endif %}
+          {{ r.start_at.strftime('%Y-%m-%d') }} → {{ r.end_at.strftime('%Y-%m-%d') }}
+          — <em>{{ r.status }}</em>
+        </li>
         {% else %}
         <li>No requests yet.</li>
         {% endfor %}

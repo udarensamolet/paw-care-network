@@ -1,45 +1,100 @@
 {% extends "_layout.html" %}
 {% block content %}
 <div class="container">
-    <div class="grid cols-2">
-        <div class="tile">
-            <h3>As Owner (my requests)</h3>
-            <ul class="list">
-                {% for a in owner_rows %}
-                <li>
-                    Assign #{{ a.id }} — sitter #{{ a.sitter_id }}
-                    — {{ a.start_at }} → {{ a.end_at }}
-                    — status: {{ a.status }}
-                    {% if a.status == 'active' %}
-                    <form method="post" action="{{ url_for('assignments.cancel_assignment', assign_id=a.id) }}"
-                        style="display:inline" onsubmit="return confirm('Cancel this assignment?');">
-                        <button class="btn outline" type="submit">Cancel</button>
-                    </form>
-                    {% endif %}
-                </li>
-                {% else %}
-                <li>No assignments as Owner.</li>
-                {% endfor %}
-            </ul>
+
+    <div class="card" style="max-width:1100px">
+        <div class="assignments-header">
+            <h1 style="margin:0;color:var(--blue)">Assignments</h1>
             <div class="btn-row">
-                <a class="btn outline" href="{{ url_for('assignments.review_list') }}">Pending applications</a>
+                <a class="btn outline" href="{{ url_for('matching.open_friend_requests') }}">Browse friends’ open
+                    requests</a>
+                <a class="btn outline" href="{{ url_for('schedule.care_list') }}">My care requests</a>
+                <a class="btn" href="{{ url_for('assignments.review_list') }}">Pending approvals</a>
             </div>
         </div>
+    </div>
 
-        <div class="tile">
-            <h3>As Sitter</h3>
-            <ul class="list">
-                {% for a in sitter_rows %}
-                <li>
-                    Assign #{{ a.id }} — request #{{ a.care_request_id }}
-                    — {{ a.start_at }} → {{ a.end_at }}
-                    — status: {{ a.status }}
-                </li>
-                {% else %}
-                <li>No assignments as Sitter.</li>
+    <div class="grid cols-2">
+        <!-- As Owner -->
+        <div class="card">
+            <h2 class="section-title">As Owner</h2>
+
+            {% if owner_rows %}
+            <div class="assignments-grid">
+                {% for a in owner_rows %}
+                <div class="assignment-card">
+                    <div class="row">
+                        <span class="when">{{ a.start_at }} → {{ a.end_at }}</span>
+                        <span class="chip {{ a.status|lower }}">{{ a.status|capitalize }}</span>
+                    </div>
+
+                    <div class="row">
+                        <span class="role-pill">
+                            Sitter: {{ friendly_name(a.sitter) or ('#' ~ a.sitter_id) }}
+                        </span>
+                        {% if a.pet and a.pet.name %}
+                        <span class="pet-pill">Pet: {{ a.pet.name }}</span>
+                        {% elif a.pet_id %}
+                        <span class="pet-pill">Pet #{{ a.pet_id }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if a.sitter_note %}
+                    <div class="note-block"><strong>Note:</strong> {{ a.sitter_note }}</div>
+                    {% endif %}
+
+                    <div class="assignment-actions">
+                        {% if a.status == 'active' %}
+                        <form method="post" action="{{ url_for('assignments.cancel_assignment', assign_id=a.id) }}"
+                            onsubmit="return confirm('Cancel this assignment?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn" type="submit">Cancel</button>
+                        </form>
+                        {% elif a.status == 'pending' %}
+                        <a class="btn outline" href="{{ url_for('assignments.review_list') }}">Review & approve</a>
+                        {% endif %}
+                    </div>
+                </div>
                 {% endfor %}
-            </ul>
+            </div>
+            {% else %}
+            <p class="help">No assignments as Owner yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- As Sitter -->
+        <div class="card">
+            <h2 class="section-title">As Sitter</h2>
+
+            {% if sitter_rows %}
+            <div class="assignments-grid">
+                {% for a in sitter_rows %}
+                <div class="assignment-card">
+                    <div class="row">
+                        <span class="when">{{ a.start_at }} → {{ a.end_at }}</span>
+                        <span class="chip {{ a.status|lower }}">{{ a.status|capitalize }}</span>
+                    </div>
+
+                    <div class="row">
+                        <span class="role-pill">Request: #{{ a.care_request_id }}</span>
+                        {% if a.pet and a.pet.name %}
+                        <span class="pet-pill">Pet: {{ a.pet.name }}</span>
+                        {% elif a.pet_id %}
+                        <span class="pet-pill">Pet #{{ a.pet_id }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if a.sitter_note %}
+                    <div class="note-block"><strong>Your note:</strong> {{ a.sitter_note }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="help">No assignments as Sitter yet.</p>
+            {% endif %}
         </div>
     </div>
+
 </div>
 {% endblock %}

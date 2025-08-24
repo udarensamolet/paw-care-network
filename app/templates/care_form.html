@@ -1,31 +1,58 @@
 {% extends "_layout.html" %}
 {% block content %}
-<h1>{{ 'New care request' if mode == 'create' else 'Edit care request' }}</h1>
-<form method="post" novalidate>
-  {{ form.csrf_token }}
+<div class="container">
+  <div class="card" style="max-width:860px">
+    {% set is_create = (mode|default('create') == 'create') %}
+    <h1 style="margin-top:0;color:var(--blue)">{{ 'New care request' if is_create else 'Edit care request' }}</h1>
+    <p class="help">Choose the time window and (optionally) a pet and location.</p>
 
-  <label>Pet
-    {{ form.pet_id() }}
-  </label>
+    <form method="post" novalidate class="form-grid two-cols" id="careForm">
+      {{ form.csrf_token }}
 
-  <label>Start (local time)
-    {{ form.start_at(type="datetime-local") }}
-  </label>
+      <div class="field">
+        <label>Start</label>
+        {{ form.start_at(type="datetime-local", class_="input", id="startAt") }}
+        {% for e in form.start_at.errors %}<div class="error">{{ e }}</div>{% endfor %}
+      </div>
 
-  <label>End (local time)
-    {{ form.end_at(type="datetime-local") }}
-  </label>
+      <div class="field">
+        <label>End</label>
+        {{ form.end_at(type="datetime-local", class_="input", id="endAt") }}
+        {% for e in form.end_at.errors %}<div class="error">{{ e }}</div>{% endfor %}
+      </div>
 
-  <label>Location
-    {{ form.location_text(size=60) }}
-  </label>
+      <div class="field">
+        <label>Pet (optional)</label>
+        {{ form.pet_id(class_="select") }}
+        {% for e in form.pet_id.errors %}<div class="error">{{ e }}</div>{% endfor %}
+      </div>
 
-  <label>Notes
-    {{ form.notes(rows=4, cols=60) }}
-  </label>
+      <div class="field">
+        <label>Location (optional)</label>
+        {{ form.location_text(class_="input", placeholder="Sofia, Studentski grad…") }}
+        {% for e in form.location_text.errors %}<div class="error">{{ e }}</div>{% endfor %}
+      </div>
 
-  <button type="submit">{{ form.submit.label.text }}</button>
-</form>
+      <div style="grid-column:1/-1; display:flex; gap:10px; flex-wrap:wrap; margin-top:6px">
+        <button class="btn" type="submit">{{ form.submit.label.text if form.submit else 'Save' }}</button>
+        <a class="btn outline" href="{{ url_for('schedule.care_list') }}">Back to list</a>
+      </div>
+    </form>
+  </div>
+</div>
 
-<p><a href="{{ url_for('schedule.care_list') }}">Back to list</a></p>
+<script>
+  (function () {
+    const start = document.getElementById('startAt');
+    const end = document.getElementById('endAt');
+    if (!start || !end) return;
+
+    function syncMin() {
+      if (start.value) end.min = start.value;
+    }
+    start.addEventListener('change', syncMin);
+    document.addEventListener('DOMContentLoaded', syncMin);
+    syncMin();
+  })();
+</script>
 {% endblock %}
