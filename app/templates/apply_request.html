@@ -1,29 +1,48 @@
 {% extends "_layout.html" %}
 {% block content %}
 <div class="container">
-    <div class="tile">
-        <h2 style="margin:0;color:var(--blue)">Apply to care for request #{{ req.id }}</h2>
-        <p class="help">Original window: <strong>{{ req.start_at }}</strong> → <strong>{{ req.end_at }}</strong></p>
-    </div>
+    <div class="card" style="max-width:760px">
+        <h1 style="margin:0 0 8px 0;color:var(--blue)">Apply to care request</h1>
 
-    <div class="tile">
-        <form method="post" novalidate class="form-stack">
+        <div class="muted" style="margin-bottom:8px">
+            <strong>#{{ req.id }}</strong>
+            — owner: {{ friendly_name(req.owner) if req.owner else req.owner_id }}
+            — pet: {{ req.pet.name if req.pet else "?" }}
+        </div>
+        <div class="help" style="margin-bottom:12px">
+            Requested window: {{ req.start_at }} → {{ req.end_at }}
+        </div>
+
+        <form method="post">
             {{ form.csrf_token }}
+            <div class="form-row">
+                <label for="{{ form.start_at.id }}">I can start at</label>
+                {{ form.start_at(type="datetime-local", class="input") }}
+                {% if form.start_at.errors %}
+                <div class="error">{{ form.start_at.errors[0] }}</div>
+                {% endif %}
+            </div>
 
-            <label class="label">I can start at
-                {{ form.start_at(type="datetime-local", class_="input") }}
-            </label>
+            <div class="form-row">
+                <label for="{{ form.end_at.id }}">I can stay until</label>
+                {{ form.end_at(type="datetime-local", class="input") }}
+                {% if form.end_at.errors %}
+                <div class="error">{{ form.end_at.errors[0] }}</div>
+                {% endif %}
+            </div>
 
-            <label class="label">I can stay until
-                {{ form.end_at(type="datetime-local", class_="input") }}
-            </label>
+            <div class="form-row">
+                <label for="{{ form.sitter_note.id }}">Note to owner (optional)</label>
+                {{ form.sitter_note(class="textarea", rows="4") }}
+                {% if form.sitter_note.errors %}
+                <div class="error">{{ form.sitter_note.errors[0] }}</div>
+                {% endif %}
+            </div>
 
-            <label class="label">Note to owner (optional)
-                {{ form.sitter_note(class_="textarea", rows=3) }}
-            </label>
-
-            <button class="btn" type="submit">{{ form.submit.label.text }}</button>
-            <a class="btn outline" href="{{ url_for('matching.open_friend_requests') }}">Back</a>
+            <div class="form-actions">
+                <a class="btn outline" href="{{ url_for('matching.open_friend_requests') }}">Back</a>
+                {{ form.submit(class="btn") }}
+            </div>
         </form>
     </div>
 </div>

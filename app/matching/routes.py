@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, abort, flash
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
@@ -53,10 +53,11 @@ def _valid_interval(start_at, end_at) -> bool:
     except Exception:
         return False
 
+
 @matching_bp.get("/requests/friends/open")
 @login_required
 def open_friend_requests():
-    """List open care requests posted by my accepted friends."""
+    """List open care requests posted by my accepted friends (with simple pagination)."""
     rels = Friendship.query.filter(
         Friendship.status == "accepted",
         or_(
@@ -69,18 +70,30 @@ def open_friend_requests():
         for r in rels
     ]
 
-    rows = []
+    rows, has_next, has_prev, page = [], False, False, 1
     if friend_ids:
-        rows = (
+        page = request.args.get("page", 1, type=int)
+        per_page = 10
+        base = (
             CareRequest.query.options(joinedload(CareRequest.pet))
             .filter(CareRequest.status == "open", CareRequest.owner_id.in_(friend_ids))
             .order_by(CareRequest.start_at.asc())
-            .all()
         )
+        fetched = base.offset((page - 1) * per_page).limit(per_page + 1).all()
+        has_next = len(fetched) > per_page
+        has_prev = page > 1
+        rows = fetched[:per_page]
 
     users = User.query.filter(User.id.in_(friend_ids)).all() if friend_ids else []
     users_map = {u.id: u for u in users}
-    return render_template("open_friend_requests.html", rows=rows, users_map=users_map)
+    return render_template(
+        "open_friend_requests.html",
+        rows=rows,
+        users_map=users_map,
+        page=page,
+        has_next=has_next,
+        has_prev=has_prev,
+    )
 
 
 @matching_bp.route("/requests/<int:req_id>/apply", methods=["GET", "POST"])
@@ -89,7 +102,7 @@ def apply_request(req_id):
     cr = CareRequest.query.options(joinedload(CareRequest.pet)).get_or_404(req_id)
 
     if cr.owner_id == current_user.id:
-        abort(403)  # Owner can't apply to their own request
+        abort(403)
 
     if cr.status != "open":
         flash("This request is not open anymore.", "warning")
@@ -112,14 +125,39 @@ def apply_request(req_id):
     if form.validate_on_submit():
         start = form.start_at.data
         end = form.end_at.data
+        now = datetime.utcnow()
 
         if not _valid_interval(start, end):
             flash("End time must be after start time.", "warning")
             return render_template("apply_request.html", form=form, req=cr)
 
+        if start < now:
+            flash("Start time cannot be in the past.", "warning")
+            return render_template("apply_request.html", form=form, req=cr)
+
         if not (cr.start_at <= start and end <= cr.end_at):
             flash(
                 "Your availability must fit within the owner's requested window.",
+                "warning",
+            )
+            return render_template("apply_request.html", form=form, req=cr)
+
+        existing = CareAssignment.query.filter_by(
+            care_request_id=cr.id, sitter_id=current_user.id
+        ).first()
+        if existing:
+            flash("You have already applied for this request.", "info")
+            return redirect(url_for("assignments.list_assignments"))
+
+        overlap = CareAssignment.query.filter(
+            CareAssignment.sitter_id == current_user.id,
+            CareAssignment.status.in_(["pending", "active"]),
+            CareAssignment.start_at < end,
+            CareAssignment.end_at > start,
+        ).first()
+        if overlap:
+            flash(
+                "You already have another assignment overlapping these times.",
                 "warning",
             )
             return render_template("apply_request.html", form=form, req=cr)

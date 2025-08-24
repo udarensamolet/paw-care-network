@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container">
   <div class="tile" style="display:flex;flex-direction:column;gap:6px">
-    <h2 style="margin:0;color:var(--blue)">Welcome, {{ user.name }}!</h2>
+    <h2 style="margin:0;color:var(--blue)">Welcome, {{ friendly_name(user) }}!</h2>
     <div class="tags">
       <span class="tag">Email: {{ user.email }}</span>
       {% if user.is_owner %}<span class="tag tag--ok">Owner</span>{% else %}<span class="tag tag--muted">Not
@@ -15,7 +15,7 @@
   <div class="grid cols-3" style="margin-top:16px">
     <div class="tile">
       <h3>My Pets</h3>
-      <div class="kpi">{{ stats.pets }}</div>
+      <div class="kpi">{{ stats.pets|default(0) }}</div>
       <div class="btn-row">
         <a class="btn outline" href="{{ url_for('pets.list_pets') }}">View</a>
         <a class="btn secondary" href="{{ url_for('pets.create_pet') }}">Add Pet</a>
@@ -24,7 +24,7 @@
 
     <div class="tile">
       <h3>Care Requests</h3>
-      <div class="kpi">{{ stats.open_requests }}</div>
+      <div class="kpi">{{ stats.open_requests|default(0) }}</div>
       <div class="kpi-sub">open</div>
       <div class="btn-row">
         <a class="btn outline" href="{{ url_for('schedule.care_list') }}">All</a>
@@ -34,7 +34,7 @@
 
     <div class="tile">
       <h3>Friends’ open requests</h3>
-      <div class="kpi">{{ stats.friends_open_reqs }}</div>
+      <div class="kpi">{{ stats.friends_open_reqs|default(0) }}</div>
       <div class="btn-row">
         <a class="btn outline" href="{{ url_for('matching.open_friend_requests') }}">Browse & apply</a>
       </div>
@@ -44,7 +44,7 @@
   <div class="grid cols-2" style="margin-top:16px">
     <div class="tile">
       <h3>Pending approvals (as Owner)</h3>
-      <div class="kpi">{{ stats.pending_approvals }}</div>
+      <div class="kpi">{{ stats.pending_approvals|default(0) }}</div>
       <div class="btn-row">
         <a class="btn outline" href="{{ url_for('assignments.review_list') }}">Review now</a>
       </div>
@@ -52,7 +52,7 @@
 
     <div class="tile">
       <h3>Assignments</h3>
-      <div class="kpi">{{ stats.sitter_assignments }}</div>
+      <div class="kpi">{{ stats.sitter_assignments|default(0) }}</div>
       <div class="btn-row">
         <a class="btn outline" href="{{ url_for('assignments.list_assignments') }}">My schedule</a>
       </div>
@@ -68,9 +68,10 @@
           #{{ r.id }} —
           {% if r.pet and r.pet.name %}
           <strong>{{ r.pet.name }}</strong> —
+          {% else %}
+          <strong>?</strong> —
           {% endif %}
-          {{ r.start_at.strftime('%Y-%m-%d') }} → {{ r.end_at.strftime('%Y-%m-%d') }}
-          — <em>{{ r.status }}</em>
+          {{ fmt_date(r.start_at) }} → {{ fmt_date(r.end_at) }} — <em>{{ r.status }}</em>
         </li>
         {% else %}
         <li>No requests yet.</li>

@@ -18,7 +18,7 @@
                     <img src="{{ pet.photo_url }}" alt="{{ pet.name }}"
                         onerror="this.parentElement.textContent='{{ pet.name[:1]|upper }}'">
                     {% else %}
-                    <img src="{{ url_for('static', filename=pet.photo_url.lstrip('/static/')) }}" alt="{{ pet.name }}"
+                    <img src="{{ url_for('static', filename=static_filename(pet.photo_url)) }}" alt="{{ pet.name }}"
                         onerror="this.parentElement.textContent='{{ pet.name[:1]|upper }}'">
                     {% endif %}
                     {% else %}
@@ -52,7 +52,7 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="help">You haven't added any pets yet.</p>
+        <p class="help">You haven’t added any pets yet.</p>
         {% endif %}
     </div>
 
