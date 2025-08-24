@@ -1,34 +1,37 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <title>Paw Care Network</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <meta charset="utf-8">
+    <title>Paw Care Network</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
+
 <body>
-  <header class="nav">
-    <div class="brand">🐾 Paw Care Network</div>
-    <nav>
-      <a href="{{ url_for('auth.login') }}">Login</a>
-      <a href="{{ url_for('auth.register') }}">Register</a>
-    </nav>
-  </header>
+    <header class="nav">
+        <div class="brand">🐾 Paw Care Network</div>
+        <nav>
+            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
+        </nav>
+    </header>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div style="max-width:960px;margin:14px auto;padding:0 12px">
+    <div class="flash-wrap">
         {% for category, msg in messages %}
-          <div class="subtle">{{ msg }}</div>
+        <div class="flash">{{ msg }}</div>
         {% endfor %}
-      </div>
+    </div>
     {% endif %}
-  {% endwith %}
+    {% endwith %}
 
-  {% block content %}{% endblock %}
+    {% block content %}{% endblock %}
 
-  <footer class="footer">
-    © {{ 2025 }} Paw Care Network | Built by udarensamolet
-  </footer>
+    <footer class="footer">
+        © {{ 2025 }} Paw Care Network | Built by udarensamolet
+    </footer>
 </body>
+
 </html>
