@@ -1,0 +1,44 @@
+{% extends "_layout.html" %}
+{% block content %}
+<div class="container">
+  <div class="tile" style="max-width:1100px">
+    <h2 style="margin:0 0 8px 0;color:var(--blue)">Analytics</h2>
+    <p class="help" style="margin:0 0 12px 0">
+      Simple charts with Plotly — owner & sitter perspective.
+    </p>
+
+    <div class="grid cols-2">
+      <div class="tile" style="min-height:340px">
+        <h3>Requests by status</h3>
+        <div id="chart-status" style="height:280px"></div>
+      </div>
+
+      <div class="tile" style="min-height:340px">
+        <h3>Requests per month</h3>
+        <div id="chart-requests" style="height:280px"></div>
+      </div>
+    </div>
+
+    <div class="tile" style="margin-top:16px; min-height:360px">
+      <h3>Your sitter hours per month</h3>
+      <div id="chart-hours" style="height:300px"></div>
+    </div>
+
+    <div style="margin-top:12px">
+      <a class="btn outline" href="{{ url_for('dashboard') }}">Back to dashboard</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+
+<script>
+  const FIG_STATUS   = {{ status_json   | safe }};
+  const FIG_REQUESTS = {{ requests_json | safe }};
+  const FIG_HOURS    = {{ hours_json    | safe }};
+
+  Plotly.newPlot('chart-status',   FIG_STATUS.data,   FIG_STATUS.layout,   {displayModeBar:false});
+  Plotly.newPlot('chart-requests', FIG_REQUESTS.data, FIG_REQUESTS.layout, {displayModeBar:false});
+  Plotly.newPlot('chart-hours',    FIG_HOURS.data,    FIG_HOURS.layout,    {displayModeBar:false});
+</script>
+{% endblock %}

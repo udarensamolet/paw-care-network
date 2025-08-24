@@ -33,10 +33,11 @@
     </div>
 
     <div class="tile">
-      <h3>Friends’ open requests</h3>
+      <h3>Friends' open requests</h3>
       <div class="kpi">{{ stats.friends_open_reqs|default(0) }}</div>
       <div class="btn-row">
         <a class="btn outline" href="{{ url_for('matching.open_friend_requests') }}">Browse & apply</a>
+        <a class="btn" href="{{ url_for('analytics.overview') }}">Analytics</a>
       </div>
     </div>
   </div>
