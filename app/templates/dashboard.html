@@ -1,15 +1,15 @@
 {% extends "_layout.html" %}
 {% block content %}
-  <h1>Welcome, {{ user.name }}!</h1>
-  <p>Email: {{ user.email }}</p>
+<h1>Welcome, {{ user.name }}!</h1>
+<p>Email: {{ user.email }}</p>
 
-  <h2>Quick links</h2>
-  <ul>
-    <li><a href="{{ url_for('social.search') }}">Find friends</a></li>
-    <li><a href="{{ url_for('social.incoming') }}">Incoming requests</a></li>
-    <li><a href="{{ url_for('social.sent') }}">Sent requests</a></li>
-    <li><a href="{{ url_for('social.friends') }}">Friends</a></li>
-  </ul>
+<h2>Quick links</h2>
+<ul>
+  <li><a href="{{ url_for('social.search') }}">Find friends</a></li>
+  <li><a href="{{ url_for('social.incoming') }}">Incoming requests</a></li>
+  <li><a href="{{ url_for('social.sent') }}">Sent requests</a></li>
+  <li><a href="{{ url_for('social.friends') }}">Friends</a></li>
+</ul>
 
-  <p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+<p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
 {% endblock %}

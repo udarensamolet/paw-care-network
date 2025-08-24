@@ -8,17 +8,17 @@
 </form>
 
 {% if results %}
-  <h2>Results</h2>
-  <ul>
-    {% for u in results %}
-      <li>
-        {{ u.name }} ({{ u.email }})
-        <form method="post" action="{{ url_for('social.send_request', user_id=u.id) }}" style="display:inline">
-          {{ send_forms[u.id].csrf_token }}
-          <button type="submit">{{ send_forms[u.id].submit.label.text }}</button>
-        </form>
-      </li>
-    {% endfor %}
-  </ul>
+<h2>Results</h2>
+<ul>
+  {% for u in results %}
+  <li>
+    {{ u.name }} ({{ u.email }})
+    <form method="post" action="{{ url_for('social.send_request', user_id=u.id) }}" style="display:inline">
+      {{ send_forms[u.id].csrf_token }}
+      <button type="submit">{{ send_forms[u.id].submit.label.text }}</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
 {% endif %}
 {% endblock %}

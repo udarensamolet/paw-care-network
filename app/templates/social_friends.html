@@ -2,12 +2,12 @@
 {% block content %}
 <h1>Your friends</h1>
 {% if friends %}
-  <ul>
-    {% for u in friends %}
-      <li>{{ u.name }} ({{ u.email }})</li>
-    {% endfor %}
-  </ul>
+<ul>
+  {% for u in friends %}
+  <li>{{ u.name }} ({{ u.email }})</li>
+  {% endfor %}
+</ul>
 {% else %}
-  <p>No friends yet.</p>
+<p>No friends yet.</p>
 {% endif %}
 {% endblock %}

@@ -12,14 +12,21 @@ from ..models.care import CareRequest
 
 schedule_bp = Blueprint("schedule", __name__, template_folder="../templates")
 
-# --- Forms ---
+
 class CareRequestForm(FlaskForm):
     pet_id = SelectField("Pet", coerce=int, validators=[Optional()])
-    start_at = DateTimeLocalField("Start", format="%Y-%m-%dT%H:%M", validators=[DataRequired()])
-    end_at   = DateTimeLocalField("End",   format="%Y-%m-%dT%H:%M", validators=[DataRequired()])
-    location_text = StringField("Location (optional)", validators=[Optional(), Length(max=255)])
+    start_at = DateTimeLocalField(
+        "Start", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
+    )
+    end_at = DateTimeLocalField(
+        "End", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
+    )
+    location_text = StringField(
+        "Location (optional)", validators=[Optional(), Length(max=255)]
+    )
     notes = TextAreaField("Notes", validators=[Optional()])
     submit = SubmitField("Save")
+
 
 def _require_owner():
     if not current_user.is_owner:
@@ -27,18 +34,25 @@ def _require_owner():
         return False
     return True
 
-def _owner_request_or_404(req_id: int) -> CareRequest:
-    return CareRequest.query.filter_by(id=req_id, owner_id=current_user.id).first_or_404()
 
-# --- Routes ---
+def _owner_request_or_404(req_id: int) -> CareRequest:
+    return CareRequest.query.filter_by(
+        id=req_id, owner_id=current_user.id
+    ).first_or_404()
+
+
 @schedule_bp.route("/care/requests", methods=["GET"])
 @login_required
 def care_list():
     if not _require_owner():
         return redirect(url_for("dashboard"))
-    reqs = CareRequest.query.filter_by(owner_id=current_user.id)\
-            .order_by(CareRequest.start_at.desc()).all()
+    reqs = (
+        CareRequest.query.filter_by(owner_id=current_user.id)
+        .order_by(CareRequest.start_at.desc())
+        .all()
+    )
     return render_template("care_list.html", requests=reqs)
+
 
 @schedule_bp.route("/care/requests/new", methods=["GET", "POST"])
 @login_required
@@ -47,7 +61,6 @@ def care_create():
         return redirect(url_for("dashboard"))
     form = CareRequestForm()
 
-    # зареждаме само моите питомци като опции
     pets = Pet.query.filter_by(owner_id=current_user.id).order_by(Pet.name).all()
     form.pet_id.choices = [(0, "-- No pet --")] + [(p.id, p.name) for p in pets]
 
@@ -67,13 +80,14 @@ def care_create():
             start_at=start_at,
             end_at=end_at,
             location_text=(form.location_text.data or "").strip() or None,
-            notes=form.notes.data
+            notes=form.notes.data,
         )
         db.session.add(cr)
         db.session.commit()
         flash("Care request created.", "success")
         return redirect(url_for("schedule.care_list"))
     return render_template("care_form.html", form=form, mode="create")
+
 
 @schedule_bp.route("/care/requests/<int:req_id>/edit", methods=["GET", "POST"])
 @login_required
@@ -104,6 +118,7 @@ def care_edit(req_id):
         flash("Care request updated.", "success")
         return redirect(url_for("schedule.care_list"))
     return render_template("care_form.html", form=form, mode="edit", req=cr)
+
 
 @schedule_bp.route("/care/requests/<int:req_id>/cancel", methods=["POST"])
 @login_required

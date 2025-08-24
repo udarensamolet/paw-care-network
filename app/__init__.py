@@ -2,6 +2,7 @@ from flask import Flask, render_template_string, redirect, url_for
 from flask_login import login_required, current_user
 from .extensions import db, migrate, login_manager
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
@@ -28,6 +29,7 @@ def create_app():
     from .models.care import CareRequest
 
     from .schedule.routes import schedule_bp
+
     app.register_blueprint(schedule_bp)
 
     @app.get("/")

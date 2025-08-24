@@ -10,15 +10,21 @@ from ..models.pet import Pet
 
 pets_bp = Blueprint("pets", __name__, template_folder="../templates")
 
+
 class PetForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired(), Length(max=120)])
     species = StringField("Species", validators=[Optional(), Length(max=50)])
     breed = StringField("Breed", validators=[Optional(), Length(max=120)])
-    age = IntegerField("Age (years)", validators=[Optional(), NumberRange(min=0, max=1000)])
+    age = IntegerField(
+        "Age (years)", validators=[Optional(), NumberRange(min=0, max=1000)]
+    )
     care_instructions = TextAreaField("Care instructions", validators=[Optional()])
     notes = TextAreaField("Notes", validators=[Optional()])
-    photo_url = URLField("Photo URL", validators=[Optional(), URL(message="Enter a valid URL")])
+    photo_url = URLField(
+        "Photo URL", validators=[Optional(), URL(message="Enter a valid URL")]
+    )
     submit = SubmitField("Save")
+
 
 def _require_owner():
     if not current_user.is_owner:
@@ -26,16 +32,23 @@ def _require_owner():
         return False
     return True
 
+
 def _get_owned_pet_or_404(pet_id: int) -> Pet:
     return Pet.query.filter_by(id=pet_id, owner_id=current_user.id).first_or_404()
+
 
 @pets_bp.route("/pets", methods=["GET"])
 @login_required
 def list_pets():
     if not _require_owner():
         return redirect(url_for("dashboard"))
-    pets = Pet.query.filter_by(owner_id=current_user.id).order_by(Pet.created_at.desc()).all()
+    pets = (
+        Pet.query.filter_by(owner_id=current_user.id)
+        .order_by(Pet.created_at.desc())
+        .all()
+    )
     return render_template("pets_list.html", pets=pets)
+
 
 @pets_bp.route("/pets/new", methods=["GET", "POST"])
 @login_required
@@ -60,6 +73,7 @@ def create_pet():
         return redirect(url_for("pets.list_pets"))
     return render_template("pet_form.html", form=form, mode="create")
 
+
 @pets_bp.route("/pets/<int:pet_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_pet(pet_id):
@@ -79,6 +93,7 @@ def edit_pet(pet_id):
         flash("Pet updated.", "success")
         return redirect(url_for("pets.list_pets"))
     return render_template("pet_form.html", form=form, mode="edit", pet=pet)
+
 
 @pets_bp.route("/pets/<int:pet_id>/delete", methods=["POST"])
 @login_required

@@ -11,18 +11,23 @@ from ..models.social import Friendship
 
 social_bp = Blueprint("social", __name__, template_folder="../templates")
 
+
 class SendRequestForm(FlaskForm):
     submit = SubmitField("Add friend")
+
 
 class AcceptForm(FlaskForm):
     submit = SubmitField("Accept")
 
+
 class DeclineForm(FlaskForm):
     submit = SubmitField("Decline")
+
 
 class SearchForm(FlaskForm):
     q = StringField("Search by name or email", validators=[Length(min=0, max=255)])
     submit = SubmitField("Search")
+
 
 def _friend_of(user_id: int):
     """Връща списък User на приятелите на user_id (accepted)."""
@@ -30,10 +35,13 @@ def _friend_of(user_id: int):
         Friendship.status == "accepted",
         or_(Friendship.requester_id == user_id, Friendship.addressee_id == user_id),
     ).all()
-    ids = [r.addressee_id if r.requester_id == user_id else r.requester_id for r in rels]
+    ids = [
+        r.addressee_id if r.requester_id == user_id else r.requester_id for r in rels
+    ]
     if not ids:
         return []
     return User.query.filter(User.id.in_(ids)).all()
+
 
 @social_bp.route("/friends", methods=["GET"])
 @login_required
@@ -41,13 +49,22 @@ def friends():
     friends = _friend_of(current_user.id)
     return render_template("social_friends.html", friends=friends)
 
+
 @social_bp.route("/incoming", methods=["GET"])
 @login_required
 def incoming():
-    reqs = Friendship.query.filter_by(addressee_id=current_user.id, status="pending").all()
+    reqs = Friendship.query.filter_by(
+        addressee_id=current_user.id, status="pending"
+    ).all()
     accept_forms = {r.id: AcceptForm(prefix=f"a{r.id}") for r in reqs}
     decline_forms = {r.id: DeclineForm(prefix=f"d{r.id}") for r in reqs}
-    return render_template("social_incoming.html", requests=reqs, accept_forms=accept_forms, decline_forms=decline_forms)
+    return render_template(
+        "social_incoming.html",
+        requests=reqs,
+        accept_forms=accept_forms,
+        decline_forms=decline_forms,
+    )
+
 
 @social_bp.route("/incoming/<int:fid>/accept", methods=["POST"])
 @login_required
@@ -67,6 +84,7 @@ def incoming_accept(fid):
     flash("Friend request accepted.", "success")
     return redirect(url_for("social.friends"))
 
+
 @social_bp.route("/incoming/<int:fid>/decline", methods=["POST"])
 @login_required
 def incoming_decline(fid):
@@ -85,11 +103,15 @@ def incoming_decline(fid):
     flash("Friend request declined.", "info")
     return redirect(url_for("social.incoming"))
 
+
 @social_bp.route("/sent", methods=["GET"])
 @login_required
 def sent():
-    reqs = Friendship.query.filter_by(requester_id=current_user.id, status="pending").all()
+    reqs = Friendship.query.filter_by(
+        requester_id=current_user.id, status="pending"
+    ).all()
     return render_template("social_sent.html", requests=reqs)
+
 
 @social_bp.route("/search", methods=["GET", "POST"])
 @login_required
@@ -101,12 +123,19 @@ def search():
     if form.validate_on_submit():
         q = form.q.data.strip().lower()
         if q:
-            results = User.query.filter(
-                User.id != current_user.id,
-                or_(User.email.ilike(f"%{q}%"), User.name.ilike(f"%{q}%")),
-            ).limit(20).all()
+            results = (
+                User.query.filter(
+                    User.id != current_user.id,
+                    or_(User.email.ilike(f"%{q}%"), User.name.ilike(f"%{q}%")),
+                )
+                .limit(20)
+                .all()
+            )
             send_forms = {u.id: SendRequestForm(prefix=f"s{u.id}") for u in results}
-    return render_template("social_search.html", form=form, results=results, send_forms=send_forms)
+    return render_template(
+        "social_search.html", form=form, results=results, send_forms=send_forms
+    )
+
 
 @social_bp.route("/request/<int:user_id>", methods=["POST"])
 @login_required
@@ -127,8 +156,12 @@ def send_request(user_id):
         if existing.status == "accepted":
             flash("You are already friends.", "info")
             return redirect(url_for("social.friends"))
-        # Ако има pending и другият ме е поканил → автоматично приеми (quality-of-life)
-        if existing.status == "pending" and existing.requester_id == target.id and existing.addressee_id == current_user.id:
+
+        if (
+            existing.status == "pending"
+            and existing.requester_id == target.id
+            and existing.addressee_id == current_user.id
+        ):
             existing.status = "accepted"
             db.session.commit()
             flash("Friend request accepted.", "success")
@@ -136,7 +169,9 @@ def send_request(user_id):
         flash("Friend request already sent.", "info")
         return redirect(url_for("social.sent"))
 
-    fr = Friendship(requester_id=current_user.id, addressee_id=target.id, status="pending")
+    fr = Friendship(
+        requester_id=current_user.id, addressee_id=target.id, status="pending"
+    )
     db.session.add(fr)
     db.session.commit()
     flash("Friend request sent.", "success")
