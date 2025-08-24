@@ -777,3 +777,49 @@ body {
     color: var(--white);
     white-space: nowrap;
 }
+
+.btn-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.btn-row>a.btn,
+.btn-row>button.btn {
+    flex: 1 1 0%;
+    /* равни ширини за линкове-копчета */
+    width: auto;
+    /* ширината идва от flex, не от съдържанието */
+}
+
+.btn-row>form {
+    flex: 1 1 0%;
+    margin: 0;
+    /* да не вдига layout */
+}
+
+.btn-row>form>.btn,
+.btn-row>form button.btn {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Small screens */
+@media (max-width: 720px) {
+    .grid.cols-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .grid.cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .pet-card {
+        grid-template-columns: 80px 1fr;
+    }
+
+    .pet-photo {
+        width: 80px;
+        height: 80px;
+    }
+}

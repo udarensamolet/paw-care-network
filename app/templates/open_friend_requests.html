@@ -3,6 +3,7 @@
 <div class="container">
     <div class="card" style="max-width:1100px">
         <h1 style="margin:0 0 12px 0;color:var(--blue)">Friends’ open requests</h1>
+
         {% if rows %}
         <ul class="list">
             {% for r in rows %}
@@ -10,18 +11,12 @@
                 <div class="row-main">
                     <div>
                         <strong>#{{ r.id }}</strong>
-                        — <span class="muted">owner:</span>
-                        {{ friendly_name(users_map.get(r.owner_id)) }}
-                        — <span class="muted">pet:</span>
-                        {{ r.pet.name if r.pet else "?" }}
+                        — <span class="muted">owner:</span> {{ friendly_name(users_map.get(r.owner_id)) }}
+                        — <span class="muted">pet:</span> {{ r.pet.name if r.pet else "?" }}
                     </div>
-                    <div class="muted" style="margin-top:2px">
-                        {{ fmt_dt(r.start_at) }} → {{ fmt_dt(r.end_at) }}
-                    </div>
+                    <div class="muted">{{ fmt_dt(r.start_at) }} → {{ fmt_dt(r.end_at) }}</div>
                     {% if r.note %}
-                    <div class="help" style="margin-top:4px;max-width:70ch">
-                        {{ r.note }}
-                    </div>
+                    <div class="help" style="max-width:70ch">{{ r.note }}</div>
                     {% endif %}
                 </div>
                 <div class="row-actions">
@@ -31,22 +26,25 @@
             {% endfor %}
         </ul>
 
-        <div class="pager" style="display:flex;gap:8px;align-items:center;margin-top:12px">
+        <div class="pager" style="margin-top:12px">
             {% if has_prev %}
             <a class="btn outline" href="{{ url_for('matching.open_friend_requests', page=page-1) }}">&larr; Prev</a>
             {% else %}
-            <span class="btn outline" style="opacity:.5;pointer-events:none">&larr; Prev</span>
+            <span class="btn outline disabled">&larr; Prev</span>
             {% endif %}
+
             <span class="muted">Page {{ page }}</span>
+
             {% if has_next %}
             <a class="btn outline" href="{{ url_for('matching.open_friend_requests', page=page+1) }}">Next &rarr;</a>
             {% else %}
-            <span class="btn outline" style="opacity:.5;pointer-events:none">Next &rarr;</span>
+            <span class="btn outline disabled">Next &rarr;</span>
             {% endif %}
         </div>
         {% else %}
         <p class="help">No open requests from your accepted friends for now.</p>
         {% endif %}
+
         <div style="margin-top:12px">
             <a class="btn outline" href="{{ url_for('dashboard') }}">Back to dashboard</a>
         </div>

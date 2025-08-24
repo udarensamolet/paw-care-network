@@ -39,11 +39,13 @@
                     </div>
                     {% endif %}
 
-                    <div class="pet-actions">
+                    <!-- Унифицирани бутони: използваме .btn-row контейнер -->
+                    <div class="btn-row">
                         <a class="btn outline" href="{{ url_for('pets.edit_pet', pet_id=pet.id) }}">Edit</a>
+
                         <form method="post" action="{{ url_for('pets.delete_pet', pet_id=pet.id) }}"
                             onsubmit="return confirm('Delete {{ pet.name }}?');">
-                            {{ csrf_token() }}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button class="btn" type="submit">Delete</button>
                         </form>
                     </div>
