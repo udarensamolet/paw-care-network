@@ -11,8 +11,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
-    # Ensure upload dir exists
     os.makedirs(os.path.join(app.static_folder, "uploads"), exist_ok=True)
+    os.makedirs(app.instance_path, exist_ok=True)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -20,39 +20,38 @@ def create_app():
     csrf.init_app(app)
     login_manager.login_view = "auth.login"
 
-    # Import models to register with SQLAlchemy
-    # Blueprints
     from .auth.routes import auth_bp
     from .models.assignment import CareAssignment
     from .models.care import CareRequest
     from .models.pet import Pet
     from .models.social import Friendship
     from .models.user import User
-
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     from .social.routes import social_bp
-
     app.register_blueprint(social_bp, url_prefix="/social")
 
     from .pets.routes import pets_bp
-
     app.register_blueprint(pets_bp)
 
     from .schedule.routes import schedule_bp
-
     app.register_blueprint(schedule_bp)
 
     from .matching.routes import matching_bp
-
     app.register_blueprint(matching_bp)
 
     from .assignments.routes import assignments_bp
-
     app.register_blueprint(assignments_bp)
 
     from .analytics.routes import analytics_bp
     app.register_blueprint(analytics_bp)
+
+    from .cli import init_db_cmd, reset_db_cmd, seed_big_cmd, seed_demo_cmd
+
+    app.cli.add_command(init_db_cmd)
+    app.cli.add_command(reset_db_cmd)
+    app.cli.add_command(seed_demo_cmd)
+    app.cli.add_command(seed_big_cmd)
 
     @app.get("/")
     def index():
@@ -63,7 +62,6 @@ def create_app():
     def dashboard():
         from sqlalchemy import or_
 
-        # Friends of current user
         rels = Friendship.query.filter(
             Friendship.status == "accepted",
             or_(
@@ -81,7 +79,6 @@ def create_app():
             "open_requests": CareRequest.query.filter_by(
                 owner_id=current_user.id, status="open"
             ).count(),
-            # Only active and not yet passed
             "sitter_assignments": CareAssignment.query.filter(
                 CareAssignment.sitter_id == current_user.id,
                 CareAssignment.status == "active",
