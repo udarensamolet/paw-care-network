@@ -36,8 +36,16 @@ body {
 }
 
 .nav .brand {
+    color: var(--white);
+    text-decoration: none;
     font-weight: 800;
-    letter-spacing: .3px
+    letter-spacing: .3px;
+}
+
+.nav .brand:hover,
+.nav .brand:focus-visible {
+    color: var(--turquoise);
+    outline: none;
 }
 
 .nav a {

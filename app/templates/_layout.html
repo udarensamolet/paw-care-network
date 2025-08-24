@@ -10,7 +10,7 @@
 
 <body>
     <header class="nav">
-        <div class="brand">🐾 Paw Care Network</div>
+        <a class="brand" href="{{ url_for('index') }}" aria-label="Go to home">🐾 Paw Care Network</a>
         <nav>
             <a href="{{ url_for('auth.login') }}">Login</a>
             <a href="{{ url_for('auth.register') }}">Register</a>
