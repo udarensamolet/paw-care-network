@@ -24,7 +24,7 @@
                 {% for a in owner_rows %}
                 <div class="assignment-card">
                     <div class="row">
-                        <span class="when">{{ a.start_at }} → {{ a.end_at }}</span>
+                        <span class="when"> {{ fmt_dt(a.start_at) }} → {{ fmt_dt(a.end_at) }}</span>
                         <span class="chip {{ a.status|lower }}">{{ a.status|capitalize }}</span>
                     </div>
 
@@ -71,7 +71,7 @@
                 {% for a in sitter_rows %}
                 <div class="assignment-card">
                     <div class="row">
-                        <span class="when">{{ a.start_at }} → {{ a.end_at }}</span>
+                        <span class="when"> {{ fmt_dt(a.start_at) }} → {{ fmt_dt(a.end_at) }}</span>
                         <span class="chip {{ a.status|lower }}">{{ a.status|capitalize }}</span>
                     </div>
 
