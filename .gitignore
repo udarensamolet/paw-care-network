@@ -1,25 +1,45 @@
-# Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-*.so
+*$py.class
 
-# Envs
 .venv/
 venv/
+ENV/
 env/
+pip-wheel-metadata/
 
-# Flask / Project
-instance/
-*.sqlite3
-*.db
-*.log
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Uploads
-uploads/
-app/static/uploads/
+.vscode/
+.idea/
+*.iml
 
-# Secrets
 .env
 .env.*
+*.pem
+*.key
+*.crt
+
+instance/
+app.db
+*.sqlite
+*.sqlite3
+
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+.pytest_cache/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+
+*.log
+logs/
+
+build/
+dist/
+.eggs/
+*.egg-info/
