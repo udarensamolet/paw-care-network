@@ -31,6 +31,9 @@ def create_app():
     from .schedule.routes import schedule_bp
     app.register_blueprint(schedule_bp)
 
+    from .models.offer import CareOffer 
+    from .models.assignment import CareAssignment  
+
     @app.get("/")
     def index():
         if current_user.is_authenticated:
