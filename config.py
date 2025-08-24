@@ -3,7 +3,7 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent
 INSTANCE_DIR = BASE_DIR / "instance"
-INSTANCE_DIR.mkdir(exist_ok=True)  # ensure instance exists
+INSTANCE_DIR.mkdir(exist_ok=True) 
 DB_FILE = INSTANCE_DIR / "app.db"
 
 
@@ -18,4 +18,4 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-change-me")
     SQLALCHEMY_DATABASE_URI = _get_database_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB uploads
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024 
