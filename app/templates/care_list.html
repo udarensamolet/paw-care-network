@@ -2,10 +2,10 @@
 {% block content %}
 <h1>Your Care Requests</h1>
 
-<p><a href="{{ url_for('schedule.care_create') }}">+ New care request</a></p>
+<p><a class="btn" href="{{ url_for('schedule.care_create') }}">+ New care request</a></p>
 
 {% if requests %}
-<ul>
+<ul class="list">
   {% for r in requests %}
   <li>
     <strong>{{ r.start_at }} → {{ r.end_at }}</strong>
@@ -13,11 +13,12 @@
     {% if r.location_text %} — {{ r.location_text }}{% endif %}
     — status: {{ r.status }}
     |
-    <a href="{{ url_for('schedule.care_edit', req_id=r.id) }}">Edit</a>
+    <a class="btn outline" href="{{ url_for('schedule.care_edit', req_id=r.id) }}">Edit</a>
     <form method="post" action="{{ url_for('schedule.care_cancel', req_id=r.id) }}" style="display:inline"
       onsubmit="return confirm('Cancel this request?');">
-      <button type="submit">Cancel</button>
+      <button class="btn outline" type="submit">Cancel</button>
     </form>
+    <a class="btn outline" href="{{ url_for('assignments.review_list') }}">Review applications</a>
   </li>
   {% endfor %}
 </ul>

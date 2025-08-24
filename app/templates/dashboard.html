@@ -13,7 +13,6 @@
   </div>
 
   <div class="grid cols-3" style="margin-top:16px">
-    <!-- KPIs -->
     <div class="tile">
       <h3>My Pets</h3>
       <div class="kpi">{{ stats.pets }}</div>
@@ -34,20 +33,20 @@
     </div>
 
     <div class="tile">
-      <h3>My Offers</h3>
-      <div class="kpi">{{ stats.my_offers }}</div>
+      <h3>Friends’ open requests</h3>
+      <div class="kpi">{{ stats.friends_open_reqs }}</div>
       <div class="btn-row">
-        <a class="btn outline" href="{{ url_for('offers.my_offers') }}">View</a>
+        <a class="btn outline" href="{{ url_for('matching.open_friend_requests') }}">Browse & apply</a>
       </div>
     </div>
   </div>
 
   <div class="grid cols-2" style="margin-top:16px">
     <div class="tile">
-      <h3>Assignments (as Owner)</h3>
-      <div class="kpi">{{ stats.owner_assignments }}</div>
+      <h3>Pending approvals (as Owner)</h3>
+      <div class="kpi">{{ stats.pending_approvals }}</div>
       <div class="btn-row">
-        <a class="btn outline" href="{{ url_for('assignments.list_assignments') }}">Open assignments</a>
+        <a class="btn outline" href="{{ url_for('assignments.review_list') }}">Review now</a>
       </div>
     </div>
 
@@ -72,24 +71,13 @@
       </ul>
     </div>
     <div class="tile">
-      <h3>My recent offers</h3>
-      <ul class="list">
-        {% for o in latest.offers %}
-        <li>#{{ o.id }} — request #{{ o.care_request_id }} — <em>{{ o.status }}</em></li>
-        {% else %}
-        <li>No offers yet.</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  <div class="tile" style="margin-top:16px">
-    <h3>Friends</h3>
-    <div class="btn-row">
-      <a class="btn outline" href="{{ url_for('social.search') }}">Find friends</a>
-      <a class="btn outline" href="{{ url_for('social.incoming') }}">Incoming</a>
-      <a class="btn outline" href="{{ url_for('social.sent') }}">Sent</a>
-      <a class="btn outline" href="{{ url_for('social.friends') }}">Friends</a>
+      <h3>Friends</h3>
+      <div class="btn-row">
+        <a class="btn outline" href="{{ url_for('social.search') }}">Find friends</a>
+        <a class="btn outline" href="{{ url_for('social.incoming') }}">Incoming</a>
+        <a class="btn outline" href="{{ url_for('social.sent') }}">Sent</a>
+        <a class="btn outline" href="{{ url_for('social.friends') }}">Friends</a>
+      </div>
     </div>
   </div>
 </div>

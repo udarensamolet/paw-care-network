@@ -1,0 +1,26 @@
+{% extends "_layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="tile">
+        <h2 style="margin:0;color:var(--blue)">Friends’ open requests</h2>
+    </div>
+
+    <div class="tile">
+        {% if rows %}
+        <ul class="list">
+            {% for r in rows %}
+            <li>
+                <strong>#{{ r.id }}</strong> — {{ r.start_at }} → {{ r.end_at }}
+                {% if r.location_text %} — {{ r.location_text }}{% endif %}
+                {% if r.pet_id %} — pet #{{ r.pet_id }}{% endif %}
+                |
+                <a class="btn" href="{{ url_for('matching.apply_request', req_id=r.id) }}">Apply</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No open requests from your friends.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

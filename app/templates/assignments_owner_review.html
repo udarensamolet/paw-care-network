@@ -1,0 +1,39 @@
+{% extends "_layout.html" %}
+{% block content %}
+<div class="container">
+  <div class="tile"><h2 style="margin:0;color:var(--blue)">Pending applications</h2></div>
+
+  <div class="tile">
+    {% if rows %}
+      <ul class="list">
+        {% for a in rows %}
+          <li>
+            <strong>Request #{{ a.care_request_id }}</strong> |
+            Sitter: #{{ a.sitter_id }} |
+            Proposed: <em>{{ a.start_at }}</em> → <em>{{ a.end_at }}</em>
+            {% if a.sitter_note %}<div class="help">Note: {{ a.sitter_note }}</div>{% endif %}
+
+            <form method="post" action="{{ url_for('assignments.approve_assignment', assign_id=a.id) }}" style="display:block;margin-top:8px">
+              {{ approve_forms[a.id].csrf_token }}
+              <div class="grid cols-3">
+                <label class="label">Start {{ approve_forms[a.id].start_at(type="datetime-local", class_="input") }}</label>
+                <label class="label">End   {{ approve_forms[a.id].end_at(type="datetime-local", class_="input") }}</label>
+                <div class="actions" style="align-items:flex-end">
+                  <button class="btn" type="submit">{{ approve_forms[a.id].submit.label.text }}</button>
+                </div>
+              </div>
+            </form>
+
+            <form method="post" action="{{ url_for('assignments.decline_assignment', assign_id=a.id) }}" style="display:inline">
+              {{ decline_forms[a.id].csrf_token }}
+              <button class="btn outline" type="submit">Decline</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No pending applications.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
