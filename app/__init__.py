@@ -1,15 +1,15 @@
 from flask import Flask, render_template
 from .extensions import db, migrate, login_manager, csrf
 from flask_login import login_required, current_user
-from datetime import datetime, timezone
+from datetime import datetime
+import os
 
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
-    import os
-
+    # Ensure upload dir exists
     os.makedirs(os.path.join(app.static_folder, "uploads"), exist_ok=True)
 
     db.init_app(app)
@@ -18,12 +18,14 @@ def create_app():
     csrf.init_app(app)
     login_manager.login_view = "auth.login"
 
+    # Import models to register with SQLAlchemy
     from .models.user import User
     from .models.social import Friendship
     from .models.pet import Pet
     from .models.care import CareRequest
     from .models.assignment import CareAssignment
 
+    # Blueprints
     from .auth.routes import auth_bp
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -55,12 +57,9 @@ def create_app():
     @app.get("/dashboard")
     @login_required
     def dashboard():
-        from .models.social import Friendship
-        from .models.pet import Pet
-        from .models.care import CareRequest
-        from .models.assignment import CareAssignment
         from sqlalchemy import or_
 
+        # Friends of current user
         rels = Friendship.query.filter(
             Friendship.status == "accepted",
             or_(
@@ -78,10 +77,11 @@ def create_app():
             "open_requests": CareRequest.query.filter_by(
                 owner_id=current_user.id, status="open"
             ).count(),
+            # Only active and not yet passed
             "sitter_assignments": CareAssignment.query.filter(
                 CareAssignment.sitter_id == current_user.id,
                 CareAssignment.status == "active",
-                CareAssignment.end_at >= datetime.now(timezone.utc),
+                CareAssignment.end_at >= datetime.utcnow(),
             ).count(),
             "friends_open_reqs": (
                 CareRequest.query.filter(
@@ -126,14 +126,36 @@ def create_app():
 
         def fmt_date(dt):
             try:
-                return dt.strftime("%Y-%m-%d")  # само дата
+                return dt.strftime("%Y-%m-%d")
             except Exception:
                 return ""
+
+        def fmt_dt(dt):
+            """YYYY-MM-DD HH:MM for human-readable date-time."""
+            try:
+                return dt.strftime("%Y-%m-%d %H:%M")
+            except Exception:
+                return ""
+
+        def static_filename(path):
+            """
+            Normalize a stored path to be used with url_for('static', filename=...).
+            We store relative paths like 'uploads/<file>'. If a legacy value like
+            '/static/uploads/<file>' appears, strip the '/static/' prefix.
+            """
+            if not path:
+                return None
+            p = str(path)
+            if p.startswith("/static/"):
+                return p[len("/static/") :]
+            return p
 
         return dict(
             friendly_name=friendly_name,
             fmt_date=fmt_date,
-            current_year=datetime.now(timezone.utc).year,
+            fmt_dt=fmt_dt,
+            static_filename=static_filename,
+            current_year=datetime.utcnow().year,
         )
 
     return app

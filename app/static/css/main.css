@@ -66,45 +66,56 @@ body {
     color: var(--turquoise)
 }
 
+/* Home (hero) — фонът запълва оставащата височина на екрана */
 .hero {
-    min-height: calc(100vh - 60px);
-    display: grid;
-    place-items: center;
-    text-align: center;
+    background-image: url('../img/hero.jpg');
     background-size: cover;
     background-position: center;
-    position: relative;
-    isolation: isolate;
+    background-repeat: no-repeat;
+
+    /* запълни височината между навбара и футъра */
+    min-height: calc(100vh - 120px);
+
+    display: grid;
+    place-items: center;
+
+    margin: 0;
+    /* без бели ръбове */
+    padding: 28px 16px;
+    border-radius: 0;
 }
 
-.hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(15, 23, 42, .45), rgba(30, 58, 138, .65));
-    z-index: -1;
-}
-
+/* Картичката – 50% прозрачност, с бордюр и сянка */
 .hero .card {
-    background: rgba(255, 255, 255, .18);
-    border: 1px solid rgba(255, 255, 255, .35);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 720px;
-    margin: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
-    color: #fff;
+    max-width: 760px;
+    background: rgba(255, 255, 255, 0.5);
+    /* 50% прозрачност */
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 14px;
+    padding: 20px 18px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
-.hero h1 {
-    color: #fff;
+.hero .card h1 {
+    margin: 0 0 10px 0;
 }
 
-.hero p {
-    margin: 0 0 18px 0;
-    font-size: clamp(16px, 2.5vw, 18px)
+.hero .card p {
+    margin: 0 0 12px 0;
+}
+
+.hero .subtle {
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: .75;
+}
+
+@media (max-width: 640px) {
+    .hero {
+        min-height: calc(100vh - 140px);
+        padding: 20px 12px;
+    }
 }
 
 .btn {
@@ -759,9 +770,56 @@ body {
     }
 }
 
+
 .hello {
     margin-right: 12px;
     font-weight: 700;
-    color: var(--dark-navy);
+    color: var(--white);
     white-space: nowrap;
+}
+
+.btn-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.btn-row>a.btn,
+.btn-row>button.btn {
+    flex: 1 1 0%;
+    /* равни ширини за линкове-копчета */
+    width: auto;
+    /* ширината идва от flex, не от съдържанието */
+}
+
+.btn-row>form {
+    flex: 1 1 0%;
+    margin: 0;
+    /* да не вдига layout */
+}
+
+.btn-row>form>.btn,
+.btn-row>form button.btn {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Small screens */
+@media (max-width: 720px) {
+    .grid.cols-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .grid.cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .pet-card {
+        grid-template-columns: 80px 1fr;
+    }
+
+    .pet-photo {
+        width: 80px;
+        height: 80px;
+    }
 }

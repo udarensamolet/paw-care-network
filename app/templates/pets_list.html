@@ -18,7 +18,7 @@
                     <img src="{{ pet.photo_url }}" alt="{{ pet.name }}"
                         onerror="this.parentElement.textContent='{{ pet.name[:1]|upper }}'">
                     {% else %}
-                    <img src="{{ url_for('static', filename=pet.photo_url.lstrip('/static/')) }}" alt="{{ pet.name }}"
+                    <img src="{{ url_for('static', filename=static_filename(pet.photo_url)) }}" alt="{{ pet.name }}"
                         onerror="this.parentElement.textContent='{{ pet.name[:1]|upper }}'">
                     {% endif %}
                     {% else %}
@@ -39,11 +39,13 @@
                     </div>
                     {% endif %}
 
-                    <div class="pet-actions">
+                    <!-- Унифицирани бутони: използваме .btn-row контейнер -->
+                    <div class="btn-row">
                         <a class="btn outline" href="{{ url_for('pets.edit_pet', pet_id=pet.id) }}">Edit</a>
+
                         <form method="post" action="{{ url_for('pets.delete_pet', pet_id=pet.id) }}"
                             onsubmit="return confirm('Delete {{ pet.name }}?');">
-                            {{ csrf_token() }}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button class="btn" type="submit">Delete</button>
                         </form>
                     </div>
@@ -52,7 +54,7 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="help">You haven't added any pets yet.</p>
+        <p class="help">You haven’t added any pets yet.</p>
         {% endif %}
     </div>
 

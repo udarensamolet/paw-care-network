@@ -1,19 +1,25 @@
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-.eggs/
+*.pyo
+*.pyd
+*.so
 
-# Venv
+# Envs
 .venv/
+venv/
+env/
 
-# Env files
-.env
-*.env
-
-# Flask / Instance
+# Flask / Project
 instance/
+*.sqlite3
+*.db
+*.log
 
-# IDE
-.vscode/
-.idea/
+# Uploads
+uploads/
+app/static/uploads/
+
+# Secrets
+.env
+.env.*
