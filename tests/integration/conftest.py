@@ -75,7 +75,7 @@ def login_as(client, app):
 
 
 @pytest.fixture()
-def sample_data(app, make_user):с
+def sample_data(app, make_user):
     owner = make_user("owner@example.com", "Owner", is_owner=True, is_sitter=False)
     sitter = make_user("sitter@example.com", "Sitter", is_owner=False, is_sitter=True)
     stranger = make_user("stranger@example.com", "Stranger", is_owner=False, is_sitter=True)
