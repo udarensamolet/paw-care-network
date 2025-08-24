@@ -41,8 +41,6 @@ def _last_n_months_labels(n: int = 6) -> list[str]:
 @analytics_bp.get("/analytics")
 @login_required
 def overview():
-    """Analytics страница с 3 графики (Plotly) — точно като в StackOverflow примера."""
-
     my_reqs = CareRequest.query.filter_by(owner_id=current_user.id).all()
 
     by_status = Counter([(r.status or "unknown") for r in my_reqs])

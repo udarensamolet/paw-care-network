@@ -12,7 +12,6 @@ from ..models.pet import Pet
 
 schedule_bp = Blueprint("schedule", __name__, template_folder="../templates")
 
-
 class CareRequestForm(FlaskForm):
     pet_id = SelectField("Pet", coerce=int, validators=[Optional()])
     start_at = DateTimeLocalField(
@@ -34,12 +33,10 @@ def _require_owner() -> bool:
         return False
     return True
 
-
 def _owner_request_or_404(req_id: int) -> CareRequest:
     return CareRequest.query.filter_by(
         id=req_id, owner_id=current_user.id
     ).first_or_404()
-
 
 @schedule_bp.get("/care/requests")
 @login_required
@@ -98,7 +95,6 @@ def care_create():
 
     return render_template("care_form.html", form=form, mode="create")
 
-
 @schedule_bp.route("/care/requests/<int:req_id>/edit", methods=["GET", "POST"])
 @login_required
 def care_edit(req_id):
@@ -133,7 +129,6 @@ def care_edit(req_id):
         return redirect(url_for("schedule.care_list"))
 
     return render_template("care_form.html", form=form, mode="edit", req=cr)
-
 
 @schedule_bp.route("/care/requests/<int:req_id>/cancel", methods=["POST"])
 @login_required

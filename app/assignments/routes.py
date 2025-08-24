@@ -53,7 +53,6 @@ def list_assignments():
         "assignments_list.html", owner_rows=owner_rows, sitter_rows=sitter_rows
     )
 
-
 @assignments_bp.route("/assignments/review", methods=["GET"])
 @login_required
 def review_list():

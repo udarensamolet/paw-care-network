@@ -86,7 +86,7 @@ def create_app() -> Flask:
     app.cli.add_command(reset_db_cmd)
     app.cli.add_command(purge_data_cmd)
     app.cli.add_command(seed_demo_cmd)
-    app.cli.add_command(seed_small_cmd)  # новата по-малка
+    app.cli.add_command(seed_small_cmd)
     app.cli.add_command(seed_big_cmd)
 
     @app.get("/")

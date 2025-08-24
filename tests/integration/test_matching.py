@@ -61,4 +61,4 @@ def test_apply_success_and_overlap_block(client, login_as, sample_data, future_i
         follow_redirects=True,
     )
     assert rv2.status_code in (200, 302, 400, 403, 409)
-    assert q.count() == 1  # няма втори assignment
+    assert q.count() == 1 

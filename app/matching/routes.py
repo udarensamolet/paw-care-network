@@ -64,7 +64,6 @@ def open_friend_requests():
             .filter(CareRequest.status == "open", CareRequest.owner_id.in_(friend_ids))
             .order_by(CareRequest.start_at.asc())
         )
-        # Fetch one extra to detect "next"
         fetched = base.offset((page - 1) * per_page).limit(per_page + 1).all()
         has_next = len(fetched) > per_page
         has_prev = page > 1
@@ -104,7 +103,6 @@ def apply_request(req_id):
 
     form = ApplyForm()
 
-    # Boundaries for HTML inputs (min/max)
     now = datetime.utcnow()
     min_start = cr.start_at if cr.start_at > now else now
     max_end = cr.end_at
@@ -125,12 +123,10 @@ def apply_request(req_id):
             flash("Start time cannot be in the past.", "warning")
             return render_template("apply_request.html", form=form, req=cr, min_start=min_start, max_end=max_end)
 
-        # Availability must fit entirely within owner's requested window
         if not (cr.start_at <= start and end <= cr.end_at):
             flash("Your availability must fit within the owner's requested window.", "warning")
             return render_template("apply_request.html", form=form, req=cr, min_start=min_start, max_end=max_end)
 
-        # Prevent duplicate application to the same request
         existing = CareAssignment.query.filter_by(
             care_request_id=cr.id, sitter_id=current_user.id
         ).first()
@@ -138,7 +134,6 @@ def apply_request(req_id):
             flash("You have already applied for this request.", "info")
             return redirect(url_for("assignments.list_assignments"))
 
-        # Prevent overlaps with sitter's other pending/active assignments
         overlap = CareAssignment.query.filter(
             CareAssignment.sitter_id == current_user.id,
             CareAssignment.status.in_(["pending", "active"]),

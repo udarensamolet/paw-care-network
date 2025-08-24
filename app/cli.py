@@ -19,14 +19,12 @@ from .models.social import Friendship
 def _db_uri() -> str:
     return current_app.config.get("SQLALCHEMY_DATABASE_URI", "")
 
-
 @click.command("init-db")
 def init_db_cmd():
     uri = _db_uri()
     click.echo(f"Creating tables on DB: {uri}")
     db.create_all()
     click.echo("✔ Tables created.")
-
 
 @click.command("reset-db")
 @click.option("--force", is_flag=True, help="Drop + create (НЕОБРАТИМО).")
@@ -39,7 +37,6 @@ def reset_db_cmd(force: bool):
     db.drop_all()
     db.create_all()
     click.echo("✔ Database reset.")
-
 
 @click.command("purge-data")
 def purge_data_cmd():
@@ -55,7 +52,6 @@ def purge_data_cmd():
     except Exception:
         pass
     click.echo("✔ All data removed (schema kept).")
-
 
 @click.command("seed-demo")
 def seed_demo_cmd():
@@ -108,14 +104,12 @@ SPECIES_BREEDS = {
     "Rabbit": ["Holland Lop", "Mini Lop", "Netherland Dwarf", "Lionhead", "Mix"],
 }
 
-
 def _rand_name() -> str:
     return f"{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}"
 
 
 def _rand_email(i: int) -> str:
     return f"user{i:03d}@paw.com"
-
 
 def _rand_pet(owner_id: int) -> Pet:
     species = random.choice(list(SPECIES_BREEDS.keys()))
@@ -127,7 +121,6 @@ def _rand_pet(owner_id: int) -> Pet:
     p = Pet(owner_id=owner_id, name=name, species=species, breed=breed, age=age)
     db.session.add(p)
     return p
-
 
 def _ensure_friendship(a_id: int, b_id: int, status: str = "accepted") -> None:
     if a_id == b_id:
@@ -142,7 +135,6 @@ def _ensure_friendship(a_id: int, b_id: int, status: str = "accepted") -> None:
         return
     f = Friendship(requester_id=a_id, addressee_id=b_id, status=status)
     db.session.add(f)
-
 
 def _make_assignment_for_request(
     req: CareRequest, sitter_id: int, mode: str, now: datetime
@@ -175,7 +167,6 @@ def _make_assignment_for_request(
     )
     db.session.add(a)
     return a
-
 
 def _seed_bulk(
     users: int,
@@ -312,7 +303,6 @@ def seed_small_cmd(
     reqs_per_pet_max: int,
 ):
     _seed_bulk(users, pets_per_owner_min, pets_per_owner_max, reqs_per_pet_min, reqs_per_pet_max)
-
 
 @click.command("seed-big")
 @click.option("--users", default=40, show_default=True, help="Общ брой потребители.")

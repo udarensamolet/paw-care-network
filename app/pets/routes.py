@@ -16,7 +16,6 @@ from ..models.pet import Pet
 
 pets_bp = Blueprint("pets", __name__, template_folder="../templates")
 
-
 class PetForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired(), Length(max=120)])
     species = StringField("Species", validators=[Optional(), Length(max=50)])
@@ -34,12 +33,10 @@ class PetForm(FlaskForm):
     )
     submit = SubmitField("Save")
 
-
 def _require_owner() -> bool:
     if not current_user.is_authenticated:
         return False
     return True
-
 
 @pets_bp.get("/pets")
 @login_required
@@ -50,7 +47,6 @@ def list_pets():
         .all()
     )
     return render_template("pets_list.html", pets=pets)
-
 
 @pets_bp.route("/pets/new", methods=["GET", "POST"])
 @login_required
@@ -86,7 +82,6 @@ def create_pet():
         return redirect(url_for("pets.list_pets"))
     return render_template("pet_form.html", form=form, mode="create")
 
-
 @pets_bp.route("/pets/<int:pet_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_pet(pet_id):
@@ -118,7 +113,6 @@ def edit_pet(pet_id):
         flash("Pet updated.", "success")
         return redirect(url_for("pets.list_pets"))
     return render_template("pet_form.html", form=form, mode="edit", pet=pet)
-
 
 @pets_bp.route("/pets/<int:pet_id>/delete", methods=["POST"])
 @login_required

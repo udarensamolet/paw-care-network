@@ -66,7 +66,7 @@ def send_request(user_id):
     existing = Friendship.query.filter(
         or_(
             and_(Friendship.requester_id == current_user.id, Friendship.addressee_id == user_id),
-            and_(Friendship.requester_id == user_id,           Friendship.addressee_id == current_user.id),
+            and_(Friendship.requester_id == user_id, Friendship.addressee_id == current_user.id),
         )
     ).first()
 

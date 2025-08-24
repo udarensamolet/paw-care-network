@@ -29,7 +29,6 @@ def register():
         return redirect(url_for("dashboard"))
     form = RegisterForm()
     if form.validate_on_submit():
-        # Проверка за уникален имейл
         if User.query.filter_by(email=form.email.data.lower()).first():
             flash("Email is already registered.", "warning")
             return redirect(url_for("auth.register"))

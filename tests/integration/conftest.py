@@ -16,14 +16,12 @@ from app.models.pet import Pet
 from app.models.social import Friendship
 from app.models.user import User
 
-
 def _assert_memory_db(uri: str):
     if uri != "sqlite:///:memory:":
         raise RuntimeError(
             f"Refusing to run tests on non-memory DB: {uri!r}. "
-            "This guard protects your real database."
+            "This guard protects the real database."
         )
-
 
 @pytest.fixture(scope="function")
 def app():
@@ -72,7 +70,6 @@ def login_as(client, app):
             sess["_user_id"] = str(user.id)
             sess["_fresh"] = True
     return _login_as
-
 
 @pytest.fixture()
 def sample_data(app, make_user):

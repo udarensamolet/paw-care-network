@@ -1,6 +1,5 @@
 from flask import url_for
 
-
 def test_home_access(client):
     rv = client.get("/")
     assert rv.status_code == 200

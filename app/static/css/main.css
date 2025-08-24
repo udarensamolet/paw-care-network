@@ -1,8 +1,3 @@
-/* =========================================================
-   Paw Care Network — Main stylesheet (refactored)
-   ========================================================= */
-
-/* ---------- CSS Variables ---------- */
 :root {
     --blue: #1E3A8A;
     --turquoise: #14B8A6;
@@ -11,7 +6,6 @@
     --dark-navy: #0F172A;
 }
 
-/* ---------- Base reset ---------- */
 * {
     box-sizing: border-box;
 }
@@ -32,12 +26,10 @@ body {
     min-height: 100vh;
 }
 
-/* Main content area grows to push footer down */
 .main {
     flex: 1 0 auto;
 }
 
-/* ---------- Header / Navbar ---------- */
 .nav {
     display: flex;
     align-items: center;
@@ -81,7 +73,6 @@ body {
     white-space: nowrap;
 }
 
-/* ---------- Footer ---------- */
 .footer {
     text-align: center;
     padding: 22px;
@@ -90,7 +81,6 @@ body {
     margin-top: auto;
 }
 
-/* ---------- Layout helpers ---------- */
 .container {
     max-width: 1100px;
     margin: 24px auto;
@@ -135,7 +125,6 @@ body {
     color: var(--blue);
 }
 
-/* ---------- Buttons ---------- */
 .btn {
     display: inline-block;
     padding: 12px 20px;
@@ -172,7 +161,6 @@ body {
     background: rgba(30, 58, 138, .08);
 }
 
-/* Equal-width buttons when grouped */
 .btn-row {
     display: flex;
     gap: 12px;
@@ -198,7 +186,6 @@ body {
     justify-content: center;
 }
 
-/* ---------- Links & micro UI ---------- */
 .link {
     color: var(--blue);
     text-decoration: none;
@@ -235,7 +222,6 @@ body {
     color: #475569;
 }
 
-/* ---------- Lists (tidy) ---------- */
 .list {
     list-style: none;
     margin: 0;
@@ -270,7 +256,6 @@ body {
     align-items: center;
 }
 
-/* Pager */
 .pager {
     display: flex;
     align-items: center;
@@ -282,7 +267,6 @@ body {
     pointer-events: none;
 }
 
-/* ---------- KPI ---------- */
 .kpi {
     font-size: 32px;
     font-weight: 800;
@@ -294,7 +278,6 @@ body {
     font-size: 14px;
 }
 
-/* ---------- Forms ---------- */
 .form-stack {
     display: grid;
     gap: 14px;
@@ -352,7 +335,6 @@ body {
     text-align: center;
 }
 
-/* Form grid */
 .form-grid {
     display: grid;
     gap: 14px;
@@ -375,7 +357,6 @@ body {
     color: var(--dark-navy);
 }
 
-/* File upload preview */
 .upload-box {
     border: 2px dashed rgba(15, 23, 42, .25);
     border-radius: 12px;
@@ -405,7 +386,6 @@ body {
     display: none;
 }
 
-/* ---------- Home (hero) ---------- */
 .hero {
     background-image: url('../img/hero.jpg');
     background-size: cover;
@@ -420,7 +400,6 @@ body {
     border-radius: 0;
 }
 
-/* Card: 50% transparency, border and shadow */
 .hero .card {
     max-width: 760px;
     background: rgba(255, 255, 255, 0.5);
@@ -452,7 +431,6 @@ body {
     }
 }
 
-/* ---------- Auth pages ---------- */
 .page-auth {
     min-height: calc(100vh - 120px);
     display: grid;
@@ -464,7 +442,6 @@ body {
     padding: 20px;
 }
 
-/* ---------- Pets list ---------- */
 .pets-header {
     display: flex;
     align-items: center;
@@ -534,7 +511,6 @@ body {
     opacity: .8;
 }
 
-/* legacy .pet-actions kept for compatibility, but .btn-row is preferred */
 .pet-actions {
     display: flex;
     gap: 10px;
@@ -542,7 +518,6 @@ body {
     flex-wrap: wrap;
 }
 
-/* ---------- People (find friends) ---------- */
 .people-actions {
     display: flex;
     gap: 8px;
@@ -620,7 +595,6 @@ body {
     color: #475569;
 }
 
-/* ---------- Care requests ---------- */
 .requests-header {
     display: flex;
     align-items: center;
@@ -714,7 +688,6 @@ body {
     margin-top: 6px;
 }
 
-/* Filter tabs */
 .tabs {
     display: flex;
     gap: 8px;
@@ -742,7 +715,6 @@ body {
     background: #e6edf5;
 }
 
-/* ---------- Assignments ---------- */
 .assignments-header {
     display: flex;
     align-items: center;
@@ -802,13 +774,11 @@ body {
     font-size: 14px;
 }
 
-/* Chips for assignment.status */
 .chip.pending {
     background: #fef3c7;
     color: #92400e;
 }
 
-/* amber */
 .chip.active {
     background: rgba(20, 184, 166, .18);
     color: var(--blue);
@@ -829,7 +799,6 @@ body {
     color: #3730a3;
 }
 
-/* Small inputs in review forms */
 .inline-form-grid {
     display: grid;
     gap: 8px;
@@ -841,7 +810,6 @@ body {
     }
 }
 
-/* ---------- Small screens tweaks ---------- */
 @media (max-width: 720px) {
     .grid.cols-3 {
         grid-template-columns: 1fr;
