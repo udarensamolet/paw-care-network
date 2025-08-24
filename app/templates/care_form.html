@@ -1,0 +1,31 @@
+{% extends "_layout.html" %}
+{% block content %}
+<h1>{{ 'New care request' if mode == 'create' else 'Edit care request' }}</h1>
+<form method="post" novalidate>
+  {{ form.csrf_token }}
+
+  <label>Pet
+    {{ form.pet_id() }}
+  </label>
+
+  <label>Start (local time)
+    {{ form.start_at(type="datetime-local") }}
+  </label>
+
+  <label>End (local time)
+    {{ form.end_at(type="datetime-local") }}
+  </label>
+
+  <label>Location
+    {{ form.location_text(size=60) }}
+  </label>
+
+  <label>Notes
+    {{ form.notes(rows=4, cols=60) }}
+  </label>
+
+  <button type="submit">{{ form.submit.label.text }}</button>
+</form>
+
+<p><a href="{{ url_for('schedule.care_list') }}">Back to list</a></p>
+{% endblock %}
