@@ -1,14 +1,14 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import login_required, current_user
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField, SubmitField
-from wtforms.validators import Optional, Length
 from sqlalchemy import and_
+from wtforms import SubmitField, TextAreaField
+from wtforms.validators import Length, Optional
 
 from ..extensions import db
+from ..models.assignment import CareAssignment
 from ..models.care import CareRequest
 from ..models.offer import CareOffer
-from ..models.assignment import CareAssignment
 from ..models.social import Friendship
 
 offers_bp = Blueprint("offers", __name__, template_folder="../templates")

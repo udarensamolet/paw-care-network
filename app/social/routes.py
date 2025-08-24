@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from flask_login import login_required, current_user
-from sqlalchemy import or_, and_, func
+from flask import Blueprint, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
+from sqlalchemy import and_, func, or_
+
 from ..extensions import db
-from ..models.user import User
 from ..models.social import Friendship
+from ..models.user import User
 
 social_bp = Blueprint("social", __name__, template_folder="../templates")
 

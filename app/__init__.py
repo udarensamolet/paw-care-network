@@ -1,8 +1,10 @@
-from flask import Flask, render_template
-from .extensions import db, migrate, login_manager, csrf
-from flask_login import login_required, current_user
-from datetime import datetime
 import os
+from datetime import datetime
+
+from flask import Flask, render_template
+from flask_login import current_user, login_required
+
+from .extensions import csrf, db, login_manager, migrate
 
 
 def create_app():
@@ -19,14 +21,13 @@ def create_app():
     login_manager.login_view = "auth.login"
 
     # Import models to register with SQLAlchemy
-    from .models.user import User
-    from .models.social import Friendship
-    from .models.pet import Pet
-    from .models.care import CareRequest
-    from .models.assignment import CareAssignment
-
     # Blueprints
     from .auth.routes import auth_bp
+    from .models.assignment import CareAssignment
+    from .models.care import CareRequest
+    from .models.pet import Pet
+    from .models.social import Friendship
+    from .models.user import User
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
 

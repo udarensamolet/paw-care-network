@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import login_required, current_user
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
-from wtforms.fields import DateTimeLocalField
-from wtforms import SubmitField
-from wtforms.validators import DataRequired
 from sqlalchemy.orm import joinedload
+from wtforms import SubmitField
+from wtforms.fields import DateTimeLocalField
+from wtforms.validators import DataRequired
 
 from ..extensions import db
 from ..models.assignment import CareAssignment

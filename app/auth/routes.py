@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, current_user
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, Email, Length
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_user, logout_user
 from flask_wtf import FlaskForm
+from wtforms import BooleanField, PasswordField, StringField, SubmitField
 from wtforms.fields import EmailField
+from wtforms.validators import DataRequired, Email, Length
+
 from ..extensions import db
 from ..models.user import User
 

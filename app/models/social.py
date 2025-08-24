@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
+
 from sqlalchemy import CheckConstraint, or_
+
 from ..extensions import db
 
 

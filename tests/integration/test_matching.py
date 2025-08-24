@@ -1,5 +1,6 @@
 from app.models.assignment import CareAssignment
 
+
 def test_open_friend_requests_list(client, login_as, sample_data):
     login_as(sample_data["sitter"])
     rv = client.get("/requests/friends/open")

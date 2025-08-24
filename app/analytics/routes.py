@@ -1,13 +1,13 @@
-from datetime import datetime
-from collections import Counter
-import json
 import importlib
+import json
+from collections import Counter
+from datetime import datetime
 
 from flask import Blueprint, render_template
-from flask_login import login_required, current_user
+from flask_login import current_user, login_required
 
-from ..models.care import CareRequest
 from ..models.assignment import CareAssignment
+from ..models.care import CareRequest
 
 analytics_bp = Blueprint("analytics", __name__, template_folder="../templates")
 

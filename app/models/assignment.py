@@ -1,6 +1,9 @@
 from datetime import datetime, timezone
+
 from sqlalchemy import CheckConstraint
+
 from ..extensions import db
+
 
 class CareAssignment(db.Model):
     __tablename__ = "care_assignments"

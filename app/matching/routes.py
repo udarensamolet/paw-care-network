@@ -1,16 +1,18 @@
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, abort, flash
-from flask_login import login_required, current_user
+
+from flask import (Blueprint, abort, flash, redirect, render_template, request,
+                   url_for)
+from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField, SubmitField
-from wtforms.fields import DateTimeLocalField
-from wtforms.validators import DataRequired, Optional, Length
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
-from sqlalchemy import or_, and_
+from wtforms import SubmitField, TextAreaField
+from wtforms.fields import DateTimeLocalField
+from wtforms.validators import DataRequired, Length, Optional
 
 from ..extensions import db
-from ..models.care import CareRequest
 from ..models.assignment import CareAssignment
+from ..models.care import CareRequest
 from ..models.social import Friendship
 from ..models.user import User
 

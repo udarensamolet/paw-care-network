@@ -1,5 +1,6 @@
 from app.models.pet import Pet
 
+
 def test_pets_list_shows_pet(client, login_as, sample_data):
     login_as(sample_data["owner"])
     rv = client.get("/pets")

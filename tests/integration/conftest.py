@@ -10,11 +10,11 @@ if ROOT_DIR not in sys.path:
 
 from app import create_app
 from app.extensions import db
-from app.models.user import User
-from app.models.social import Friendship
-from app.models.pet import Pet
-from app.models.care import CareRequest
 from app.models.assignment import CareAssignment
+from app.models.care import CareRequest
+from app.models.pet import Pet
+from app.models.social import Friendship
+from app.models.user import User
 
 
 def _assert_memory_db(uri: str):

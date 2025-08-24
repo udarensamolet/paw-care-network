@@ -1,21 +1,15 @@
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-    redirect,
-    url_for,
-    flash,
-    current_app,
-)
-from flask_login import login_required, current_user
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
-from werkzeug.utils import secure_filename
-from wtforms import StringField, IntegerField, TextAreaField, SubmitField
-from wtforms.fields import URLField
-from wtforms.validators import DataRequired, Length, Optional, NumberRange, URL
 import os
 import time as pytime
+
+from flask import (Blueprint, current_app, flash, redirect, render_template,
+                   request, url_for)
+from flask_login import current_user, login_required
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField
+from werkzeug.utils import secure_filename
+from wtforms import IntegerField, StringField, SubmitField, TextAreaField
+from wtforms.fields import URLField
+from wtforms.validators import URL, DataRequired, Length, NumberRange, Optional
 
 from ..extensions import db
 from ..models.pet import Pet
