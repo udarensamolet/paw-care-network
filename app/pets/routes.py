@@ -20,19 +20,28 @@ class PetForm(FlaskForm):
     photo_url = URLField("Photo URL", validators=[Optional(), URL(message="Enter a valid URL")])
     submit = SubmitField("Save")
 
+def _require_owner():
+    if not current_user.is_owner:
+        flash("Only owners can manage pets.", "warning")
+        return False
+    return True
+
 def _get_owned_pet_or_404(pet_id: int) -> Pet:
-    # Важно: достъп само до собствените ти животни
     return Pet.query.filter_by(id=pet_id, owner_id=current_user.id).first_or_404()
 
 @pets_bp.route("/pets", methods=["GET"])
 @login_required
 def list_pets():
+    if not _require_owner():
+        return redirect(url_for("dashboard"))
     pets = Pet.query.filter_by(owner_id=current_user.id).order_by(Pet.created_at.desc()).all()
     return render_template("pets_list.html", pets=pets)
 
 @pets_bp.route("/pets/new", methods=["GET", "POST"])
 @login_required
 def create_pet():
+    if not _require_owner():
+        return redirect(url_for("dashboard"))
     form = PetForm()
     if form.validate_on_submit():
         pet = Pet(
@@ -54,6 +63,8 @@ def create_pet():
 @pets_bp.route("/pets/<int:pet_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_pet(pet_id):
+    if not _require_owner():
+        return redirect(url_for("dashboard"))
     pet = _get_owned_pet_or_404(pet_id)
     form = PetForm(obj=pet)
     if form.validate_on_submit():
@@ -72,6 +83,8 @@ def edit_pet(pet_id):
 @pets_bp.route("/pets/<int:pet_id>/delete", methods=["POST"])
 @login_required
 def delete_pet(pet_id):
+    if not _require_owner():
+        return redirect(url_for("dashboard"))
     pet = _get_owned_pet_or_404(pet_id)
     db.session.delete(pet)
     db.session.commit()
