@@ -21,7 +21,6 @@ class CareRequest(db.Model):
         index=True,
     )
 
-    # за MVP пазим naive datetime и ги третираме като UTC
     start_at = db.Column(db.DateTime, nullable=False)
     end_at = db.Column(db.DateTime, nullable=False)
 
@@ -30,7 +29,7 @@ class CareRequest(db.Model):
 
     status = db.Column(
         db.String(20), nullable=False, default="open"
-    )  # open, matched, confirmed, cancelled, completed
+    )  
     created_at = db.Column(
         db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
