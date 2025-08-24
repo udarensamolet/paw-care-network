@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template
 from flask_login import login_required, current_user
 from .extensions import db, migrate, login_manager
 import os
@@ -52,11 +52,29 @@ def create_app():
     @app.get("/dashboard")
     @login_required
     def dashboard():
-        return render_template_string(
-            "<h1>Welcome, {{ user.name }}!</h1>"
-            "<p>Email: {{ user.email }}</p>"
-            '<p><a href="{{ url_for("auth.logout") }}">Logout</a></p>',
-            user=current_user,
-        )
+        from .models.pet import Pet
+        from .models.care import CareRequest
+        from .models.offer import CareOffer
+        from .models.assignment import CareAssignment
 
+        stats = {
+            "pets": Pet.query.filter_by(owner_id=current_user.id).count(),
+            "open_requests": CareRequest.query.filter_by(owner_id=current_user.id, status="open").count(),
+            "my_offers": CareOffer.query.filter_by(sitter_id=current_user.id).count(),
+            "owner_assignments": (
+                CareAssignment.query.join(CareRequest, CareRequest.id == CareAssignment.care_request_id)
+                .filter(CareRequest.owner_id == current_user.id).count()
+            ),
+            "sitter_assignments": CareAssignment.query.filter_by(sitter_id=current_user.id).count(),
+        }
+
+        latest = {
+            "requests": CareRequest.query.filter_by(owner_id=current_user.id)
+                            .order_by(CareRequest.created_at.desc()).limit(5).all(),
+            "offers": CareOffer.query.filter_by(sitter_id=current_user.id)
+                        .order_by(CareOffer.created_at.desc()).limit(5).all(),
+        }
+
+        return render_template("dashboard.html", user=current_user, stats=stats, latest=latest)
+    
     return app
