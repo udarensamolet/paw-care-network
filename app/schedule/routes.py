@@ -1,10 +1,10 @@
-from datetime import datetime
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, SelectField
 from wtforms.fields import DateTimeLocalField
 from wtforms.validators import DataRequired, Optional, Length
+from sqlalchemy.orm import joinedload
 
 from ..extensions import db
 from ..models.pet import Pet
@@ -27,10 +27,10 @@ class CareRequestForm(FlaskForm):
     notes = TextAreaField("Notes", validators=[Optional()])
     submit = SubmitField("Save")
 
-
-def _require_owner():
-    if not current_user.is_owner:
-        flash("Only owners can create/view care requests.", "warning")
+def _require_owner() -> bool:
+    """Гарантира, че само Owner вижда/менажира заявки."""
+    if not getattr(current_user, "is_owner", False):
+        flash("Only owners can manage care requests.", "warning")
         return False
     return True
 
@@ -41,24 +41,32 @@ def _owner_request_or_404(req_id: int) -> CareRequest:
     ).first_or_404()
 
 
-@schedule_bp.route("/care/requests", methods=["GET"])
+@schedule_bp.get("/care/requests")
 @login_required
 def care_list():
     if not _require_owner():
         return redirect(url_for("dashboard"))
-    reqs = (
-        CareRequest.query.filter_by(owner_id=current_user.id)
-        .order_by(CareRequest.start_at.desc())
-        .all()
-    )
-    return render_template("care_list.html", requests=reqs)
 
+    status = (request.args.get("status") or "all").lower()
+
+    q = CareRequest.query.options(
+        joinedload(CareRequest.pet)
+    ).filter_by( 
+        owner_id=current_user.id
+    )
+
+    if status in {"open", "confirmed", "cancelled"}:
+        q = q.filter_by(status=status)
+
+    requests = q.order_by(CareRequest.start_at.desc()).all()
+    return render_template("care_list.html", requests=requests)
 
 @schedule_bp.route("/care/requests/new", methods=["GET", "POST"])
 @login_required
 def care_create():
     if not _require_owner():
         return redirect(url_for("dashboard"))
+
     form = CareRequestForm()
 
     pets = Pet.query.filter_by(owner_id=current_user.id).order_by(Pet.name).all()
@@ -84,8 +92,10 @@ def care_create():
         )
         db.session.add(cr)
         db.session.commit()
+
         flash("Care request created.", "success")
         return redirect(url_for("schedule.care_list"))
+
     return render_template("care_form.html", form=form, mode="create")
 
 
@@ -94,7 +104,9 @@ def care_create():
 def care_edit(req_id):
     if not _require_owner():
         return redirect(url_for("dashboard"))
+
     cr = _owner_request_or_404(req_id)
+
     if cr.status in ("cancelled", "completed"):
         flash("Cannot edit a cancelled or completed request.", "warning")
         return redirect(url_for("schedule.care_list"))
@@ -112,11 +124,14 @@ def care_edit(req_id):
         if cr.end_at <= cr.start_at:
             flash("End must be after Start.", "warning")
             return render_template("care_form.html", form=form, mode="edit", req=cr)
+
         cr.location_text = (form.location_text.data or "").strip() or None
         cr.notes = form.notes.data
         db.session.commit()
+
         flash("Care request updated.", "success")
         return redirect(url_for("schedule.care_list"))
+
     return render_template("care_form.html", form=form, mode="edit", req=cr)
 
 
@@ -125,7 +140,11 @@ def care_edit(req_id):
 def care_cancel(req_id):
     if not _require_owner():
         return redirect(url_for("dashboard"))
+
     cr = _owner_request_or_404(req_id)
+    if cr.status == "cancelled":
+        return redirect(url_for("schedule.care_list"))
+
     cr.status = "cancelled"
     db.session.commit()
     flash("Care request cancelled.", "info")

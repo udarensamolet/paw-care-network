@@ -1,13 +1,30 @@
 {% extends "_layout.html" %}
 {% block content %}
-<h1>Your friends</h1>
-{% if friends %}
-<ul>
-  {% for u in friends %}
-  <li>{{ u.name }} ({{ u.email }})</li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>No friends yet.</p>
-{% endif %}
+<div class="container">
+  <div class="card" style="max-width:1100px">
+    <h1 style="margin:0;color:var(--blue)">Friends</h1>
+  </div>
+
+  <div class="card" style="max-width:1100px">
+    {% if users %}
+    <div class="people-grid">
+      {% for u in users %}
+      <div class="person-card">
+        <div class="avatar">{{ (u.name or u.email)[:1]|upper }}</div>
+        <div class="person">
+          <h3>{{ u.name or u.email }}</h3>
+          <div class="muted">{{ u.email }}</div>
+          <div class="people-actions">
+            <span class="badge ok">Friend</span>
+            {# по желание: бутон Remove friend — ако добавим рут #}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="help">No friends yet. Try <a class="link" href="{{ url_for('social.search') }}">searching</a>.</p>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

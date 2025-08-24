@@ -1,28 +1,69 @@
 {% extends "_layout.html" %}
 {% block content %}
-<h1>Your Care Requests</h1>
+<div class="container">
 
-<p><a class="btn" href="{{ url_for('schedule.care_create') }}">+ New care request</a></p>
+  <div class="card" style="max-width:1100px">
+    <div class="requests-header">
+      <h1 style="margin:0;color:var(--blue)">Your care requests</h1>
+      <a class="btn" href="{{ url_for('schedule.care_create') }}">+ New request</a>
+    </div>
 
-{% if requests %}
-<ul class="list">
-  {% for r in requests %}
-  <li>
-    <strong>{{ r.start_at }} → {{ r.end_at }}</strong>
-    {% if r.pet_id %} — pet #{{ r.pet_id }}{% endif %}
-    {% if r.location_text %} — {{ r.location_text }}{% endif %}
-    — status: {{ r.status }}
-    |
-    <a class="btn outline" href="{{ url_for('schedule.care_edit', req_id=r.id) }}">Edit</a>
-    <form method="post" action="{{ url_for('schedule.care_cancel', req_id=r.id) }}" style="display:inline"
-      onsubmit="return confirm('Cancel this request?');">
-      <button class="btn outline" type="submit">Cancel</button>
-    </form>
-    <a class="btn outline" href="{{ url_for('assignments.review_list') }}">Review applications</a>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>No care requests yet.</p>
-{% endif %}
+    {# Филтри по статус (по избор: ?status=open|confirmed|cancelled|all) #}
+    {% set current = (request.args.get('status') or 'all').lower() %}
+    <div class="tabs">
+      <a class="tab {{ 'active' if current=='all' }}" href="{{ url_for('schedule.care_list') }}">All</a>
+      <a class="tab {{ 'active' if current=='open' }}"
+        href="{{ url_for('schedule.care_list', status='open') }}">Open</a>
+      <a class="tab {{ 'active' if current=='confirmed' }}"
+        href="{{ url_for('schedule.care_list', status='confirmed') }}">Confirmed</a>
+      <a class="tab {{ 'active' if current=='cancelled' }}"
+        href="{{ url_for('schedule.care_list', status='cancelled') }}">Cancelled</a>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:1100px">
+    {% if requests %}
+    <div class="requests-grid">
+      {% for r in requests %}
+      <div class="request-card">
+        <div class="row">
+          <span class="when">{{ r.start_at }} → {{ r.end_at }}</span>
+          <span class="chip {{ r.status|lower }}">{{ r.status|capitalize }}</span>
+        </div>
+
+        <div class="row">
+          {% if r.pet and r.pet.name %}
+          <span class="pet-pill">Pet: {{ r.pet.name }}</span>
+          {% elif r.pet_id %}
+          <span class="pet-pill">Pet #{{ r.pet_id }}</span>
+          {% endif %}
+          {% if r.location_text %}
+          <span class="where">• {{ r.location_text }}</span>
+          {% endif %}
+        </div>
+
+        {% if r.notes %}
+        <div class="help" style="max-width:70ch">{{ r.notes }}</div>
+        {% endif %}
+
+        <div class="req-actions">
+          <a class="btn outline" href="{{ url_for('schedule.care_edit', req_id=r.id) }}">Edit</a>
+          {% if r.status != 'cancelled' %}
+          <form method="post" action="{{ url_for('schedule.care_cancel', req_id=r.id) }}"
+            onsubmit="return confirm('Cancel this request?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn" type="submit">Cancel</button>
+          </form>
+          {% endif %}
+          <a class="btn outline" href="{{ url_for('assignments.review_list') }}">Review applications</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="help">No requests here. Try switching the filter above or create a new one.</p>
+    {% endif %}
+  </div>
+
+</div>
 {% endblock %}

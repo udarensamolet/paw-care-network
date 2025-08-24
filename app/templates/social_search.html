@@ -1,24 +1,82 @@
 {% extends "_layout.html" %}
 {% block content %}
-<h1>Find friends</h1>
-<form method="post" novalidate>
-  {{ form.csrf_token }}
-  <label>{{ form.q.label }} {{ form.q(size=40) }}</label>
-  <button type="submit">{{ form.submit.label.text }}</button>
-</form>
-
-{% if results %}
-<h2>Results</h2>
-<ul>
-  {% for u in results %}
-  <li>
-    {{ u.name }} ({{ u.email }})
-    <form method="post" action="{{ url_for('social.send_request', user_id=u.id) }}" style="display:inline">
-      {{ send_forms[u.id].csrf_token }}
-      <button type="submit">{{ send_forms[u.id].submit.label.text }}</button>
+<div class="container">
+  <div class="card" style="max-width:1100px">
+    <h1 style="margin:0;color:var(--blue)">Find friends</h1>
+    <form method="get" class="form-stack" style="margin-top:10px">
+      <div class="field" style="display:flex; gap:8px">
+        <input class="input" type="text" name="q" value="{{ q or '' }}" placeholder="Search by name or email…"
+          style="flex:1">
+        <button class="btn" type="submit">Search</button>
+      </div>
+      <div class="help">Tip: use part of a name or a full email. Search is case-insensitive.</div>
     </form>
-  </li>
-  {% endfor %}
-</ul>
-{% endif %}
+  </div>
+
+  <div class="card" style="max-width:1100px">
+    {% if results %}
+    <div class="people-grid">
+      {% for u in results %}
+      <div class="person-card">
+        <div class="avatar">{{ (u.name or u.email)[:1]|upper }}</div>
+
+        <div class="person">
+          <h3>{{ u.name or u.email }}</h3>
+          <div class="muted">{{ u.email }}</div>
+
+          {% set st = status_map.get(u.id, 'none') %}
+
+          {% if st == 'friends' %}
+          <div class="people-actions">
+            <span class="badge ok">Friends</span>
+          </div>
+
+          {% elif st == 'sent' %}
+          <div class="people-actions">
+            <span class="badge muted">Request sent</span>
+            <form method="post" action="{{ url_for('social.cancel', user_id=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="q" value="{{ q or '' }}">
+              <button class="btn outline" type="submit">Cancel</button>
+            </form>
+          </div>
+
+          {% elif st == 'incoming' %}
+          <div class="people-actions">
+            <span class="badge muted">Requested you</span>
+            <form method="post" action="{{ url_for('social.accept', user_id=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="q" value="{{ q or '' }}">
+              <button class="btn" type="submit">Accept</button>
+            </form>
+            <form method="post" action="{{ url_for('social.decline', user_id=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="q" value="{{ q or '' }}">
+              <button class="btn outline" type="submit">Decline</button>
+            </form>
+          </div>
+
+          {% else %}
+          <div class="people-actions">
+            <form method="post" action="{{ url_for('social.send_request', user_id=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="q" value="{{ q or '' }}">
+              <button class="btn" type="submit">Add friend</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    {% if q %}
+    <p class="help">No users found for “{{ q }}”. Try another query.</p>
+    {% else %}
+    <p class="help">Start by searching for a friend's name or email.</p>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
