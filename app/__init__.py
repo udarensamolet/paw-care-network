@@ -50,6 +50,9 @@ def create_app():
 
     app.register_blueprint(assignments_bp)
 
+    from .analytics.routes import analytics_bp
+    app.register_blueprint(analytics_bp)
+
     @app.get("/")
     def index():
         return render_template("home.html")
@@ -131,18 +134,12 @@ def create_app():
                 return ""
 
         def fmt_dt(dt):
-            """YYYY-MM-DD HH:MM for human-readable date-time."""
             try:
                 return dt.strftime("%Y-%m-%d %H:%M")
             except Exception:
                 return ""
 
         def static_filename(path):
-            """
-            Normalize a stored path to be used with url_for('static', filename=...).
-            We store relative paths like 'uploads/<file>'. If a legacy value like
-            '/static/uploads/<file>' appears, strip the '/static/' prefix.
-            """
             if not path:
                 return None
             p = str(path)
