@@ -1,15 +1,19 @@
+from __future__ import annotations
+
 import random
 from datetime import datetime, timedelta
 
 import click
 from flask import current_app
+from sqlalchemy import text
 
 from .extensions import db
-from .models.assignment import CareAssignment
-from .models.care import CareRequest
-from .models.pet import Pet
-from .models.social import Friendship
+
 from .models.user import User
+from .models.pet import Pet
+from .models.care import CareRequest
+from .models.assignment import CareAssignment
+from .models.social import Friendship
 
 
 def _db_uri() -> str:
@@ -37,19 +41,31 @@ def reset_db_cmd(force: bool):
     click.echo("✔ Database reset.")
 
 
+@click.command("purge-data")
+def purge_data_cmd():
+    db.session.query(CareAssignment).delete()
+    db.session.query(CareRequest).delete()
+    db.session.query(Pet).delete()
+    db.session.query(Friendship).delete()
+    db.session.query(User).delete()
+    db.session.commit()
+    try:
+        db.session.execute(text("DELETE FROM sqlite_sequence"))
+        db.session.commit()
+    except Exception:
+        pass
+    click.echo("✔ All data removed (schema kept).")
+
+
 @click.command("seed-demo")
 def seed_demo_cmd():
-    owner = User(
-        email="demo@paw.com", name="Demo Owner", is_owner=True, is_sitter=False
-    )
+    owner = User(email="demo@paw.com", name="Demo Owner", is_owner=True, is_sitter=False)
     if hasattr(owner, "set_password"):
         owner.set_password("demo")
     db.session.add(owner)
     db.session.commit()
 
-    sitter = User(
-        email="sitter@paw.com", name="Demo Sitter", is_owner=False, is_sitter=True
-    )
+    sitter = User(email="sitter@paw.com", name="Demo Sitter", is_owner=False, is_sitter=True)
     if hasattr(sitter, "set_password"):
         sitter.set_password("demo")
     db.session.add(sitter)
@@ -76,54 +92,17 @@ def seed_demo_cmd():
     click.echo("✔ Seed done. Users: demo@paw.com / sitter@paw.com (парола: demo)")
 
 FIRST_NAMES = [
-    "Alex",
-    "Mira",
-    "Daniel",
-    "Eva",
-    "Ivo",
-    "Nina",
-    "Chris",
-    "Maria",
-    "Petar",
-    "Georgi",
-    "Viktor",
-    "Sofia",
-    "Ani",
-    "Stoyan",
-    "Kalina",
-    "Toma",
-    "Raya",
-    "Mila",
-    "Rumen",
-    "Teo",
+    "Alex", "Mira", "Daniel", "Eva", "Ivo", "Nina", "Chris", "Maria", "Petar", "Georgi",
+    "Viktor", "Sofia", "Ani", "Stoyan", "Kalina", "Toma", "Raya", "Mila", "Rumen", "Teo",
 ]
 LAST_NAMES = [
-    "Petrov",
-    "Georgieva",
-    "Ivanov",
-    "Dimitrova",
-    "Nikolov",
-    "Stoyanova",
-    "Kolev",
-    "Marinova",
-    "Kostov",
-    "Hristova",
-    "Vasilev",
-    "Todorova",
-    "Alexandrov",
-    "Ilieva",
+    "Petrov", "Georgieva", "Ivanov", "Dimitrova", "Nikolov", "Stoyanova", "Kolev",
+    "Marinova", "Kostov", "Hristova", "Vasilev", "Todorova", "Alexandrov", "Ilieva",
 ]
 
 SPECIES_BREEDS = {
     "Cat": ["Domestic Shorthair", "British Shorthair", "Siamese", "Maine Coon", "Mix"],
-    "Dog": [
-        "Labrador",
-        "German Shepherd",
-        "Golden Retriever",
-        "Bulldog",
-        "Poodle",
-        "Mix",
-    ],
+    "Dog": ["Labrador", "German Shepherd", "Golden Retriever", "Bulldog", "Poodle", "Mix"],
     "Bird": ["Budgerigar", "Cockatiel", "Canary", "Lovebird", "Parrot"],
     "Hamster": ["Syrian", "Dwarf Campbell", "Winter White", "Chinese", "Roborovski"],
     "Rabbit": ["Holland Lop", "Mini Lop", "Netherland Dwarf", "Lionhead", "Mix"],
@@ -143,20 +122,7 @@ def _rand_pet(owner_id: int) -> Pet:
     breed = random.choice(SPECIES_BREEDS[species])
     age = random.randint(1, 14)
     name = random.choice(
-        [
-            "Maca",
-            "Rex",
-            "Bobi",
-            "Luna",
-            "Simba",
-            "Molly",
-            "Kaya",
-            "Pufi",
-            "Rocky",
-            "Tara",
-            "Miro",
-            "Sisi",
-        ]
+        ["Maca", "Rex", "Bobi", "Luna", "Simba", "Molly", "Kaya", "Pufi", "Rocky", "Tara", "Miro", "Sisi"]
     )
     p = Pet(owner_id=owner_id, name=name, species=species, breed=breed, age=age)
     db.session.add(p)
@@ -191,7 +157,7 @@ def _make_assignment_for_request(
         req.start_at = start
         req.end_at = end
         status = "active"
-    else:  
+    else:
         duration_h = random.randint(2, 24)
         end = now - timedelta(days=random.randint(1, 20), hours=random.randint(0, 12))
         start = end - timedelta(hours=duration_h)
@@ -204,45 +170,20 @@ def _make_assignment_for_request(
         end_at=end,
         status=status,
         sitter_note=random.choice(
-            [
-                "Happy to help!",
-                "Evening walks OK.",
-                "Can do meds.",
-                "Near the owner.",
-                "Flexible hours.",
-            ]
+            ["Happy to help!", "Evening walks OK.", "Can do meds.", "Near the owner.", "Flexible hours."]
         ),
     )
     db.session.add(a)
     return a
 
-@click.command("seed-big")
-@click.option("--users", default=40, show_default=True, help="Общ брой потребители.")
-@click.option(
-    "--pets-per-owner-min",
-    default=1,
-    show_default=True,
-    help="Мин. брой pets на owner.",
-)
-@click.option(
-    "--pets-per-owner-max",
-    default=3,
-    show_default=True,
-    help="Макс. брой pets на owner.",
-)
-@click.option(
-    "--reqs-per-pet-min", default=2, show_default=True, help="Мин. заявки за pet."
-)
-@click.option(
-    "--reqs-per-pet-max", default=5, show_default=True, help="Макс. заявки за pet."
-)
-def seed_big_cmd(
+
+def _seed_bulk(
     users: int,
     pets_per_owner_min: int,
     pets_per_owner_max: int,
     reqs_per_pet_min: int,
     reqs_per_pet_max: int,
-):
+) -> None:
     random.seed(42)
     uri = _db_uri()
     click.echo(f"Seeding on DB: {uri}")
@@ -252,14 +193,9 @@ def seed_big_cmd(
     all_users: list[User] = []
     for i in range(users):
         role_pick = random.random()
-        is_owner = role_pick < 0.4 or (0.7 <= role_pick <= 1.0)  
-        is_sitter = role_pick > 0.3 
-        u = User(
-            email=_rand_email(i),
-            name=_rand_name(),
-            is_owner=is_owner,
-            is_sitter=is_sitter,
-        )
+        is_owner = role_pick < 0.4 or (0.7 <= role_pick <= 1.0) 
+        is_sitter = role_pick > 0.3                             
+        u = User(email=_rand_email(i), name=_rand_name(), is_owner=is_owner, is_sitter=is_sitter)
         if hasattr(u, "set_password"):
             u.set_password("demo")
         db.session.add(u)
@@ -268,9 +204,7 @@ def seed_big_cmd(
 
     owners = [u for u in all_users if u.is_owner]
     sitters = [u for u in all_users if u.is_sitter]
-    click.echo(
-        f"Users: total={len(all_users)} owners={len(owners)} sitters={len(sitters)}"
-    )
+    click.echo(f"Users: total={len(all_users)} owners={len(owners)} sitters={len(sitters)}")
 
     for o in owners:
         candidates = random.sample(sitters, k=min(4, len(sitters))) if sitters else []
@@ -280,7 +214,6 @@ def seed_big_cmd(
             _ensure_friendship(o.id, candidates[3].id, status="pending")
     db.session.commit()
 
-    # ---- Pets ----
     pets: list[Pet] = []
     for o in owners:
         k = random.randint(pets_per_owner_min, pets_per_owner_max)
@@ -320,8 +253,7 @@ def seed_big_cmd(
             )
         ).all()
         friend_ids = [
-            (r.addressee_id if r.requester_id == p.owner_id else r.requester_id)
-            for r in rels
+            (r.addressee_id if r.requester_id == p.owner_id else r.requester_id) for r in rels
         ]
         friend_sitters = [u for u in all_users if u.id in friend_ids and u.is_sitter]
 
@@ -340,7 +272,7 @@ def seed_big_cmd(
                 status=st,
             )
             db.session.add(req)
-            db.session.flush() 
+            db.session.flush()  
 
             if friend_sitters and st in {"assigned", "active", "done"}:
                 sitter = random.choice(friend_sitters)
@@ -359,9 +291,40 @@ def seed_big_cmd(
     pending_asg = CareAssignment.query.filter_by(status="pending").count()
 
     click.echo(
-        "✔ Seed big completed:\n"
+        "✔ Seed completed:\n"
         f"  Users: {len(all_users)}\n"
         f"  Pets: {len(pets)}\n"
         f"  Requests: {total_reqs} (open: {open_reqs})\n"
         f"  Assignments: {total_asg} (pending: {pending_asg}, active: {active_asg}, done: {done_asg})"
     )
+
+@click.command("seed-small")
+@click.option("--users", default=20, show_default=True, help="Общ брой потребители.")
+@click.option("--pets-per-owner-min", default=1, show_default=True, help="Мин. брой pets на owner.")
+@click.option("--pets-per-owner-max", default=2, show_default=True, help="Макс. брой pets на owner.")
+@click.option("--reqs-per-pet-min", default=1, show_default=True, help="Мин. заявки за pet.")
+@click.option("--reqs-per-pet-max", default=3, show_default=True, help="Макс. заявки за pet.")
+def seed_small_cmd(
+    users: int,
+    pets_per_owner_min: int,
+    pets_per_owner_max: int,
+    reqs_per_pet_min: int,
+    reqs_per_pet_max: int,
+):
+    _seed_bulk(users, pets_per_owner_min, pets_per_owner_max, reqs_per_pet_min, reqs_per_pet_max)
+
+
+@click.command("seed-big")
+@click.option("--users", default=40, show_default=True, help="Общ брой потребители.")
+@click.option("--pets-per-owner-min", default=1, show_default=True, help="Мин. брой pets на owner.")
+@click.option("--pets-per-owner-max", default=3, show_default=True, help="Макс. брой pets на owner.")
+@click.option("--reqs-per-pet-min", default=2, show_default=True, help="Мин. заявки за pet.")
+@click.option("--reqs-per-pet-max", default=5, show_default=True, help="Макс. заявки за pet.")
+def seed_big_cmd(
+    users: int,
+    pets_per_owner_min: int,
+    pets_per_owner_max: int,
+    reqs_per_pet_min: int,
+    reqs_per_pet_max: int,
+):
+    _seed_bulk(users, pets_per_owner_min, pets_per_owner_max, reqs_per_pet_min, reqs_per_pet_max)

@@ -1,18 +1,44 @@
+from __future__ import annotations
+
 import os
+import sqlite3
 from datetime import datetime
 
 from flask import Flask, render_template
-from flask_login import current_user, login_required
+from flask_login import login_required, current_user
 
-from .extensions import csrf, db, login_manager, migrate
+from sqlalchemy import event, or_
+from sqlalchemy.engine import Engine
+
+from .extensions import db, migrate, login_manager, csrf
 
 
-def create_app():
+@event.listens_for(Engine, "connect")
+def _set_sqlite_pragmas(dbapi_connection, connection_record) -> None:
+    if isinstance(dbapi_connection, sqlite3.Connection):
+        cur = dbapi_connection.cursor()
+        cur.execute("PRAGMA foreign_keys=ON")
+        cur.execute("PRAGMA journal_mode=WAL")
+        cur.execute("PRAGMA synchronous=NORMAL")
+        cur.execute("PRAGMA busy_timeout=30000")
+        cur.close()
+
+
+def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
     os.makedirs(os.path.join(app.static_folder, "uploads"), exist_ok=True)
     os.makedirs(app.instance_path, exist_ok=True)
+
+    uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+    if uri.startswith("sqlite:"):
+        opts = dict(app.config.get("SQLALCHEMY_ENGINE_OPTIONS", {}))
+        ca = dict(opts.get("connect_args", {}))
+        ca.setdefault("check_same_thread", False)
+        ca.setdefault("timeout", 30)
+        opts["connect_args"] = ca
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = opts
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -20,12 +46,13 @@ def create_app():
     csrf.init_app(app)
     login_manager.login_view = "auth.login"
 
-    from .auth.routes import auth_bp
-    from .models.assignment import CareAssignment
-    from .models.care import CareRequest
-    from .models.pet import Pet
-    from .models.social import Friendship
     from .models.user import User
+    from .models.social import Friendship
+    from .models.pet import Pet
+    from .models.care import CareRequest
+    from .models.assignment import CareAssignment
+
+    from .auth.routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     from .social.routes import social_bp
@@ -46,11 +73,20 @@ def create_app():
     from .analytics.routes import analytics_bp
     app.register_blueprint(analytics_bp)
 
-    from .cli import init_db_cmd, reset_db_cmd, seed_big_cmd, seed_demo_cmd
+    from .cli import (
+        init_db_cmd,
+        reset_db_cmd,
+        purge_data_cmd,
+        seed_demo_cmd,
+        seed_small_cmd,
+        seed_big_cmd,
+    )
 
     app.cli.add_command(init_db_cmd)
     app.cli.add_command(reset_db_cmd)
+    app.cli.add_command(purge_data_cmd)
     app.cli.add_command(seed_demo_cmd)
+    app.cli.add_command(seed_small_cmd)  # новата по-малка
     app.cli.add_command(seed_big_cmd)
 
     @app.get("/")
@@ -60,8 +96,6 @@ def create_app():
     @app.get("/dashboard")
     @login_required
     def dashboard():
-        from sqlalchemy import or_
-
         rels = Friendship.query.filter(
             Friendship.status == "accepted",
             or_(
@@ -86,7 +120,8 @@ def create_app():
             ).count(),
             "friends_open_reqs": (
                 CareRequest.query.filter(
-                    CareRequest.status == "open", CareRequest.owner_id.in_(friend_ids)
+                    CareRequest.status == "open",
+                    CareRequest.owner_id.in_(friend_ids),
                 ).count()
                 if friend_ids
                 else 0
@@ -152,5 +187,13 @@ def create_app():
             static_filename=static_filename,
             current_year=datetime.utcnow().year,
         )
+
+    @app.teardown_request
+    def _teardown_request(_exc):
+        try:
+            if _exc is not None:
+                db.session.rollback()
+        finally:
+            db.session.remove()
 
     return app
