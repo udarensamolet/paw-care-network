@@ -1,4 +1,12 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    current_app,
+)
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
@@ -19,34 +27,29 @@ class PetForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired(), Length(max=120)])
     species = StringField("Species", validators=[Optional(), Length(max=50)])
     breed = StringField("Breed", validators=[Optional(), Length(max=120)])
-    age = IntegerField(
-        "Age (years)", validators=[Optional(), NumberRange(min=0, max=1000)]
-    )
+    age = IntegerField("Age", validators=[Optional(), NumberRange(min=0, max=200)])
     care_instructions = TextAreaField("Care instructions", validators=[Optional()])
     notes = TextAreaField("Notes", validators=[Optional()])
-    photo_url = URLField(
-        "Photo URL", validators=[Optional(), URL(message="Enter a valid URL")]
+    photo_url = URLField("Photo URL", validators=[Optional(), URL(), Length(max=255)])
+    photo_file = FileField(
+        "Upload photo",
+        validators=[
+            Optional(),
+            FileAllowed(["png", "jpg", "jpeg", "gif"], "Images only!"),
+        ],
     )
-    photo_file = FileField("Upload photo", validators=[FileAllowed(["jpg","jpeg","png","gif"], "Images only!")])
     submit = SubmitField("Save")
 
 
-def _require_owner():
-    if not current_user.is_owner:
-        flash("Only owners can manage pets.", "warning")
+def _require_owner() -> bool:
+    if not current_user.is_authenticated:
         return False
     return True
 
 
-def _get_owned_pet_or_404(pet_id: int) -> Pet:
-    return Pet.query.filter_by(id=pet_id, owner_id=current_user.id).first_or_404()
-
-
-@pets_bp.route("/pets", methods=["GET"])
+@pets_bp.get("/pets")
 @login_required
 def list_pets():
-    if not _require_owner():
-        return redirect(url_for("dashboard"))
     pets = (
         Pet.query.filter_by(owner_id=current_user.id)
         .order_by(Pet.created_at.desc())
@@ -60,6 +63,7 @@ def list_pets():
 def create_pet():
     if not _require_owner():
         return redirect(url_for("dashboard"))
+
     form = PetForm()
     if form.validate_on_submit():
         pet = Pet(
@@ -79,8 +83,9 @@ def create_pet():
                 unique = f"{int(pytime.time())}_{current_user.id}{ext.lower()}"
                 upload_dir = os.path.join(current_app.static_folder, "uploads")
                 file_path = os.path.join(upload_dir, unique)
+                os.makedirs(upload_dir, exist_ok=True)
                 form.photo_file.data.save(file_path)
-                pet.photo_url = f"/static/uploads/{unique}"
+                pet.photo_url = f"uploads/{unique}"
         db.session.add(pet)
         db.session.commit()
         flash("Pet created.", "success")
@@ -102,7 +107,8 @@ def edit_pet(pet_id):
         pet.age = form.age.data
         pet.care_instructions = form.care_instructions.data
         pet.notes = form.notes.data
-        pet.photo_url = (form.photo_url.data or "").strip() or None
+        pet.photo_url = (form.photo_url.data or "").strip() or pet.photo_url
+
         if form.photo_file.data:
             filename = secure_filename(form.photo_file.data.filename)
             if filename:
@@ -110,8 +116,10 @@ def edit_pet(pet_id):
                 unique = f"{int(pytime.time())}_{current_user.id}{ext.lower()}"
                 upload_dir = os.path.join(current_app.static_folder, "uploads")
                 file_path = os.path.join(upload_dir, unique)
+                os.makedirs(upload_dir, exist_ok=True)
                 form.photo_file.data.save(file_path)
-                pet.photo_url = f"/static/uploads/{unique}"
+                pet.photo_url = f"uploads/{unique}"
+
         db.session.commit()
         flash("Pet updated.", "success")
         return redirect(url_for("pets.list_pets"))
@@ -128,3 +136,12 @@ def delete_pet(pet_id):
     db.session.commit()
     flash("Pet deleted.", "info")
     return redirect(url_for("pets.list_pets"))
+
+
+def _get_owned_pet_or_404(pet_id: int) -> Pet:
+    pet = Pet.query.get_or_404(pet_id)
+    if pet.owner_id != current_user.id:
+        from flask import abort
+
+        abort(404)
+    return pet

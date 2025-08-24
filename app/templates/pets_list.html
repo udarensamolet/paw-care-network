@@ -43,6 +43,7 @@
                         <a class="btn outline" href="{{ url_for('pets.edit_pet', pet_id=pet.id) }}">Edit</a>
                         <form method="post" action="{{ url_for('pets.delete_pet', pet_id=pet.id) }}"
                             onsubmit="return confirm('Delete {{ pet.name }}?');">
+                            {{ csrf_token() }}
                             <button class="btn" type="submit">Delete</button>
                         </form>
                     </div>
@@ -51,7 +52,7 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="help">You haven’t added any pets yet.</p>
+        <p class="help">You haven't added any pets yet.</p>
         {% endif %}
     </div>
 
