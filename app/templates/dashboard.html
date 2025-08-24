@@ -1,15 +1,84 @@
 {% extends "_layout.html" %}
 {% block content %}
-<h1>Welcome, {{ user.name }}!</h1>
-<p>Email: {{ user.email }}</p>
+<div class="container">
+  <div class="tile" style="display:flex;flex-direction:column;gap:6px">
+    <h2 style="margin:0;color:var(--blue)">Welcome, {{ user.name }}!</h2>
+    <div class="tags">
+      <span class="tag">Email: {{ user.email }}</span>
+      {% if user.is_owner %}<span class="tag tag--ok">Owner</span>{% else %}<span class="tag tag--muted">Not
+        Owner</span>{% endif %}
+      {% if user.is_sitter %}<span class="tag tag--ok">Sitter</span>{% else %}<span class="tag tag--muted">Not
+        Sitter</span>{% endif %}
+    </div>
+  </div>
 
-<h2>Quick links</h2>
-<ul>
-  <li><a href="{{ url_for('social.search') }}">Find friends</a></li>
-  <li><a href="{{ url_for('social.incoming') }}">Incoming requests</a></li>
-  <li><a href="{{ url_for('social.sent') }}">Sent requests</a></li>
-  <li><a href="{{ url_for('social.friends') }}">Friends</a></li>
-</ul>
+  <div class="grid cols-3" style="margin-top:16px">
+    <div class="tile">
+      <h3>My Pets</h3>
+      <div class="kpi">{{ stats.pets }}</div>
+      <div class="btn-row">
+        <a class="btn outline" href="{{ url_for('pets.list_pets') }}">View</a>
+        <a class="btn secondary" href="{{ url_for('pets.create_pet') }}">Add Pet</a>
+      </div>
+    </div>
 
-<p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+    <div class="tile">
+      <h3>Care Requests</h3>
+      <div class="kpi">{{ stats.open_requests }}</div>
+      <div class="kpi-sub">open</div>
+      <div class="btn-row">
+        <a class="btn outline" href="{{ url_for('schedule.care_list') }}">All</a>
+        <a class="btn secondary" href="{{ url_for('schedule.care_create') }}">New request</a>
+      </div>
+    </div>
+
+    <div class="tile">
+      <h3>Friends’ open requests</h3>
+      <div class="kpi">{{ stats.friends_open_reqs }}</div>
+      <div class="btn-row">
+        <a class="btn outline" href="{{ url_for('matching.open_friend_requests') }}">Browse & apply</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="tile">
+      <h3>Pending approvals (as Owner)</h3>
+      <div class="kpi">{{ stats.pending_approvals }}</div>
+      <div class="btn-row">
+        <a class="btn outline" href="{{ url_for('assignments.review_list') }}">Review now</a>
+      </div>
+    </div>
+
+    <div class="tile">
+      <h3>Assignments (as Sitter)</h3>
+      <div class="kpi">{{ stats.sitter_assignments }}</div>
+      <div class="btn-row">
+        <a class="btn outline" href="{{ url_for('assignments.list_assignments') }}">My schedule</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="tile">
+      <h3>Recent requests</h3>
+      <ul class="list">
+        {% for r in latest.requests %}
+        <li>#{{ r.id }} — {{ r.start_at }} → {{ r.end_at }} — <em>{{ r.status }}</em></li>
+        {% else %}
+        <li>No requests yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="tile">
+      <h3>Friends</h3>
+      <div class="btn-row">
+        <a class="btn outline" href="{{ url_for('social.search') }}">Find friends</a>
+        <a class="btn outline" href="{{ url_for('social.incoming') }}">Incoming</a>
+        <a class="btn outline" href="{{ url_for('social.sent') }}">Sent</a>
+        <a class="btn outline" href="{{ url_for('social.friends') }}">Friends</a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

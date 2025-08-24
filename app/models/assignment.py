@@ -30,7 +30,10 @@ class CareAssignment(db.Model):
     start_at = db.Column(db.DateTime, nullable=False)
     end_at = db.Column(db.DateTime, nullable=False)
 
-    status = db.Column(db.String(20), nullable=False, default="active")
+    sitter_note = db.Column(db.Text, nullable=True)
+
+    status = db.Column(db.String(20), nullable=False, default="pending")
+
     created_at = db.Column(
         db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )

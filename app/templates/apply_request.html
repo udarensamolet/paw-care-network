@@ -1,0 +1,30 @@
+{% extends "_layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="tile">
+        <h2 style="margin:0;color:var(--blue)">Apply to care for request #{{ req.id }}</h2>
+        <p class="help">Original window: <strong>{{ req.start_at }}</strong> → <strong>{{ req.end_at }}</strong></p>
+    </div>
+
+    <div class="tile">
+        <form method="post" novalidate class="form-stack">
+            {{ form.csrf_token }}
+
+            <label class="label">I can start at
+                {{ form.start_at(type="datetime-local", class_="input") }}
+            </label>
+
+            <label class="label">I can stay until
+                {{ form.end_at(type="datetime-local", class_="input") }}
+            </label>
+
+            <label class="label">Note to owner (optional)
+                {{ form.sitter_note(class_="textarea", rows=3) }}
+            </label>
+
+            <button class="btn" type="submit">{{ form.submit.label.text }}</button>
+            <a class="btn outline" href="{{ url_for('matching.open_friend_requests') }}">Back</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
