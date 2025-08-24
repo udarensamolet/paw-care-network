@@ -25,7 +25,10 @@ def create_app():
     from .pets.routes import pets_bp
     app.register_blueprint(pets_bp)
 
-    from .models.care import CareRequest  
+    from .models.care import CareRequest
+
+    from .schedule.routes import schedule_bp
+    app.register_blueprint(schedule_bp)
 
     @app.get("/")
     def index():
