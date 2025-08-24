@@ -2,86 +2,76 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>Paw Care Network</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-    <meta name="theme-color" content="#F5E6D3">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/flash.css') }}">
+  <meta charset="utf-8">
+  <title>Paw Care Network</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <meta name="theme-color" content="#F5E6D3">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/flash.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 </head>
 
 <body>
-    <header class="nav">
-        <a class="brand" href="{{ url_for('index') }}">🐾 Paw Care Network</a>
-        <nav>
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            {% if current_user.is_sitter %}
-            <a href="{{ url_for('matching.open_friend_requests') }}">Friends’ open requests</a>
-            {% endif %}
-            <span class="hello">Hello, {{ friendly_name(current_user)|truncate(24, True) }}!</span>
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
-            {% else %}
-            <a href="{{ url_for('auth.login') }}">Login</a>
-            <a href="{{ url_for('auth.register') }}">Register</a>
-            {% endif %}
-        </nav>
-    </header>
+  <header class="nav">
+    <a class="brand"
+       href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('index') }}">
+       🐾 Paw Care Network
+    </a>
 
-    <main class="main">
-        {% block content %}{% endblock %}
-    </main>
+    <nav>
+      {% if current_user.is_authenticated %}
+        <span class="hello">Hello, {{ friendly_name(current_user)|truncate(24, True) }}!</span>
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">Login</a>
+        <a href="{{ url_for('auth.register') }}">Register</a>
+      {% endif %}
+    </nav>
+  </header>
 
-    <footer class="footer">
-        © {{ current_year }} Paw Care Network | Built by udarensamolet
-    </footer>
+  <main class="main">
+    {% block content %}{% endblock %}
+  </main>
 
-    {# Toasts: красиви flash съобщения под header-а #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
+  <footer class="footer">
+    © {{ current_year }} Paw Care Network | Built by udarensamolet
+  </footer>
+
+  {# Toasts #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     <div id="toast-root" aria-live="polite" aria-atomic="true">
-        {% for category, message in messages %}
+      {% for category, message in messages %}
         <div class="toast {{ (category or 'info')|lower }}" role="alert" data-timeout="4500">
-            <div class="toast-body">
-                <strong class="toast-title">
-                    {% if (category or '').lower() == 'success' %}Success{% elif (category or '').lower() in ['error','danger'] %}Error{% elif (category or '').lower() == 'warning' %}Warning{% else %}Info{% endif %}
-                </strong>
-                <div class="toast-text">{{ message }}</div>
-            </div>
-            <button class="toast-close" aria-label="Close" title="Close">&times;</button>
+          <div class="toast-body">
+            <strong class="toast-title">
+              {% if (category or '').lower() == 'success' %}Success{% elif (category or '').lower() in ['error','danger'] %}Error{% elif (category or '').lower() == 'warning' %}Warning{% else %}Info{% endif %}
+            </strong>
+            <div class="toast-text">{{ message }}</div>
+          </div>
+          <button class="toast-close" aria-label="Close" title="Close">&times;</button>
         </div>
-        {% endfor %}
+      {% endfor %}
     </div>
     {% endif %}
-    {% endwith %}
+  {% endwith %}
 
-    <script>
-        (function () {
-            var root = document.getElementById('toast-root');
-            if (!root) return;
-
-            function dismiss(el) {
-                el.classList.add('hide');
-                setTimeout(function () {
-                    el.remove();
-                }, 250);
-            }
-            root.querySelectorAll('.toast').forEach(function (el, idx) {
-                setTimeout(function () {
-                    el.classList.add('show');
-                }, 30 + idx * 40);
-                var t = setTimeout(function () {
-                    dismiss(el);
-                }, parseInt(el.dataset.timeout || '4500', 10));
-                var btn = el.querySelector('.toast-close');
-                if (btn) btn.addEventListener('click', function () {
-                    clearTimeout(t);
-                    dismiss(el);
-                });
-            });
-        })();
-    </script>
+  <script>
+  (function () {
+    var root = document.getElementById('toast-root');
+    if (!root) return;
+    function dismiss(el) {
+      el.classList.add('hide');
+      setTimeout(function(){ el.remove(); }, 250);
+    }
+    root.querySelectorAll('.toast').forEach(function (el, idx) {
+      setTimeout(function(){ el.classList.add('show'); }, 30 + idx * 40);
+      var t = setTimeout(function(){ dismiss(el); }, parseInt(el.dataset.timeout || '4500', 10));
+      var btn = el.querySelector('.toast-close');
+      if (btn) btn.addEventListener('click', function(){ clearTimeout(t); dismiss(el); });
+    });
+  })();
+  </script>
 </body>
-
 </html>
