@@ -1,0 +1,33 @@
+{% extends "_layout.html" %}
+{% block content %}
+<h1>Assignments</h1>
+
+<h2>As Owner (my requests)</h2>
+<ul>
+    {% for a in owner_rows %}
+    <li>
+        Assign #{{ a.id }} — sitter #{{ a.sitter_id }} — {{ a.start_at }} → {{ a.end_at }} — status: {{ a.status }}
+        {% if a.status == 'active' %}
+        <form method="post" action="{{ url_for('assignments.cancel_assignment', assign_id=a.id) }}"
+            style="display:inline" onsubmit="return confirm('Cancel this assignment?');">
+            <button type="submit">Cancel</button>
+        </form>
+        {% endif %}
+    </li>
+    {% else %}
+    <li>No assignments as Owner.</li>
+    {% endfor %}
+</ul>
+
+<h2>As Sitter</h2>
+<ul>
+    {% for a in sitter_rows %}
+    <li>
+        Assign #{{ a.id }} — request #{{ a.care_request_id }} — {{ a.start_at }} → {{ a.end_at }} — status:
+        {{ a.status }}
+    </li>
+    {% else %}
+    <li>No assignments as Sitter.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
