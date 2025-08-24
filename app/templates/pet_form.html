@@ -1,21 +1,25 @@
 {% extends "_layout.html" %}
 {% block content %}
 <h1>{{ 'Add Pet' if mode == 'create' else 'Edit Pet' }}</h1>
-<form method="post" novalidate>
+<form method="post" enctype="multipart/form-data" novalidate>
     {{ form.csrf_token }}
     <label>Name {{ form.name(size=40) }}</label>
     <label>Species {{ form.species(size=40) }}</label>
     <label>Breed {{ form.breed(size=40) }}</label>
     <label>Age (years) {{ form.age(min=0) }}</label>
+
     <label>Photo URL {{ form.photo_url(size=60) }}</label>
-    {% if mode == 'edit' and pet.photo_url %}
-    <p>Current photo:</p>
-    <img src="{{ pet.photo_url }}" alt="{{ pet.name }}" style="max-width:160px; border-radius:8px;"
-        onerror="this.style.display='none'">
-    {% endif %}
+    <label>Upload photo {{ form.photo_file() }}</label>
+
     <label>Care instructions {{ form.care_instructions(rows=4, cols=60) }}</label>
     <label>Notes {{ form.notes(rows=3, cols=60) }}</label>
     <button type="submit">{{ form.submit.label.text }}</button>
 </form>
+
+{% if mode == 'edit' and pet.photo_url %}
+<p>Current photo:</p>
+<img src="{{ pet.photo_url if pet.photo_url.startswith('http') else url_for('static', filename=pet.photo_url.lstrip('/static/')) }}"
+    alt="{{ pet.name }}" style="max-width:200px;border-radius:10px" onerror="this.style.display='none'">
+{% endif %}
 <p><a href="{{ url_for('pets.list_pets') }}">Back to list</a></p>
 {% endblock %}
