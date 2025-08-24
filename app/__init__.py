@@ -38,7 +38,7 @@ def create_app():
     app.register_blueprint(offers_bp, url_prefix="")
 
     from .assignments.routes import assignments_bp
-    app.register_blueprint(assignments_bp, url_prefix="")
+    app.register_blueprint(assignments_bp, url_prefix="")   
 
     @app.get("/")
     def index():
