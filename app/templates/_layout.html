@@ -25,11 +25,58 @@
     {% if messages %}
     <div class="flash-wrap">
         {% for category, msg in messages %}
-        <div class="flash">{{ msg }}</div>
+        {% set cls = 'flash' %}
+        {% if category in ['success','info','warning','danger','error'] %}
+        {% set cls = 'flash flash--' + category %}
+        {% endif %}
+        {% set role = 'status' %}
+        {% if category in ['warning','danger','error'] %}
+        {% set role = 'alert' %}
+        {% endif %}
+        {# timeout: 0 = no auto-hide #}
+        {% set timeout = 4500 %}
+        {% if category in ['warning','danger','error'] %}
+        {% set timeout = 0 %}
+        {% endif %}
+
+        <div class="{{ cls }}" role="{{ role }}" aria-live="polite" data-timeout="{{ timeout }}">
+            <button class="flash__close" aria-label="Dismiss">&times;</button>
+            {{ msg }}
+        </div>
         {% endfor %}
     </div>
     {% endif %}
     {% endwith %}
+
+    <!-- Auto-hide + close behavior -->
+    <script>
+        (function () {
+            function dismiss(el) {
+                el.classList.add('flash--hidden');
+                el.addEventListener('transitionend', () => el.remove(), {
+                    once: true
+                });
+            }
+            document.querySelectorAll('.flash').forEach(el => {
+                const timeout = parseInt(el.dataset.timeout || '0', 10);
+                let timer = null;
+                if (timeout > 0) {
+                    timer = setTimeout(() => dismiss(el), timeout);
+                    el.addEventListener('mouseenter', () => {
+                        if (timer) clearTimeout(timer);
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        timer = setTimeout(() => dismiss(el), 1500);
+                    });
+                }
+                const btn = el.querySelector('.flash__close');
+                if (btn) {
+                    btn.addEventListener('click', () => dismiss(el));
+                }
+            });
+        })();
+    </script>
+
 
     {% block content %}{% endblock %}
 
