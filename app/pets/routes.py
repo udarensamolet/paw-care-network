@@ -1,9 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from datetime import time
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
+from werkzeug.utils import secure_filename
 from wtforms import StringField, IntegerField, TextAreaField, SubmitField
 from wtforms.fields import URLField
 from wtforms.validators import DataRequired, Length, Optional, NumberRange, URL
+import os
 
 from ..extensions import db
 from ..models.pet import Pet
@@ -23,6 +27,7 @@ class PetForm(FlaskForm):
     photo_url = URLField(
         "Photo URL", validators=[Optional(), URL(message="Enter a valid URL")]
     )
+    photo_file = FileField("Upload photo", validators=[FileAllowed(["jpg","jpeg","png","gif"], "Images only!")])
     submit = SubmitField("Save")
 
 
@@ -67,6 +72,15 @@ def create_pet():
             notes=form.notes.data,
             photo_url=(form.photo_url.data or "").strip() or None,
         )
+        if form.photo_file.data:
+            filename = secure_filename(form.photo_file.data.filename)
+            if filename:
+                name, ext = os.path.splitext(filename)
+                unique = f"{int(time.time())}_{current_user.id}{ext.lower()}"
+                upload_dir = os.path.join(current_app.static_folder, "uploads")
+                file_path = os.path.join(upload_dir, unique)
+                form.photo_file.data.save(file_path)
+                pet.photo_url = f"/static/uploads/{unique}"
         db.session.add(pet)
         db.session.commit()
         flash("Pet created.", "success")
@@ -89,6 +103,15 @@ def edit_pet(pet_id):
         pet.care_instructions = form.care_instructions.data
         pet.notes = form.notes.data
         pet.photo_url = (form.photo_url.data or "").strip() or None
+        if form.photo_file.data:
+            filename = secure_filename(form.photo_file.data.filename)
+            if filename:
+                name, ext = os.path.splitext(filename)
+                unique = f"{int(time.time())}_{current_user.id}{ext.lower()}"
+                upload_dir = os.path.join(current_app.static_folder, "uploads")
+                file_path = os.path.join(upload_dir, unique)
+                form.photo_file.data.save(file_path)
+                pet.photo_url = f"/static/uploads/{unique}"
         db.session.commit()
         flash("Pet updated.", "success")
         return redirect(url_for("pets.list_pets"))

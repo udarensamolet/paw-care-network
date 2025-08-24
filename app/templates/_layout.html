@@ -1,66 +1,34 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <title>Paw Care Network</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-            margin: 2rem;
-        }
-
-        form {
-            max-width: 420px;
-        }
-
-        label {
-            display: block;
-            margin-top: 0.75rem;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 0.5rem;
-        }
-
-        button {
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-        }
-
-        .flash {
-            padding: 0.5rem 0;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Paw Care Network</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
-
 <body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div>
-        {% for category, msg in messages %}
-        <div class="flash">{{ msg }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
+  <header class="nav">
+    <div class="brand">🐾 Paw Care Network</div>
     <nav>
-        <a href="{{ url_for('auth.register') }}">Register</a> |
-        <a href="{{ url_for('auth.login') }}">Login</a> |
-        <a href="{{ url_for('dashboard') }}">Dashboard</a> |
-        <a href="{{ url_for('social.search') }}">Find friends</a> |
-        <a href="{{ url_for('social.incoming') }}">Incoming</a> |
-        <a href="{{ url_for('social.sent') }}">Sent</a> |
-        <a href="{{ url_for('social.friends') }}">Friends</a> |
-        <a href="{{ url_for('auth.logout') }}">Logout</a>
+      <a href="{{ url_for('auth.login') }}">Login</a>
+      <a href="{{ url_for('auth.register') }}">Register</a>
     </nav>
-    <hr>
-    {% block content %}{% endblock %}
-</body>
+  </header>
 
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div style="max-width:960px;margin:14px auto;padding:0 12px">
+        {% for category, msg in messages %}
+          <div class="subtle">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+
+  <footer class="footer">
+    © {{ 2025 }} Paw Care Network | Built by udarensamolet
+  </footer>
+</body>
 </html>

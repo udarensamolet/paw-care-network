@@ -1,6 +1,7 @@
-from flask import Flask, render_template_string, redirect, url_for
+from flask import Flask, render_template_string, redirect, url_for, render_template
 from flask_login import login_required, current_user
 from .extensions import db, migrate, login_manager
+import os
 
 
 def create_app():
@@ -12,6 +13,8 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
     login_manager.login_message_category = "info"
+
+    os.makedirs(os.path.join(app.static_folder, "uploads"), exist_ok=True)
 
     from .models.user import User
     from .models.social import Friendship
@@ -44,7 +47,7 @@ def create_app():
     def index():
         if current_user.is_authenticated:
             return redirect(url_for("dashboard"))
-        return "Paw Care Network — API is alive. Go to /auth/register or /auth/login."
+        return render_template("home.html")
 
     @app.get("/dashboard")
     @login_required
