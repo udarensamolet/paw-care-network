@@ -32,8 +32,10 @@ cd paw-care-network
 python -m venv .venv
 .venv\Scripts\activate
 
+# Install needed requireme
 pip install -r requirements.txt
 
+# Tell Flask where the app is
 $env:FLASK_APP = "wsgi.py"
 
 # Create tables and seed small demo data
