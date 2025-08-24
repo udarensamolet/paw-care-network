@@ -1,4 +1,3 @@
-from datetime import time
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
@@ -8,6 +7,7 @@ from wtforms import StringField, IntegerField, TextAreaField, SubmitField
 from wtforms.fields import URLField
 from wtforms.validators import DataRequired, Length, Optional, NumberRange, URL
 import os
+import time as pytime
 
 from ..extensions import db
 from ..models.pet import Pet
@@ -76,7 +76,7 @@ def create_pet():
             filename = secure_filename(form.photo_file.data.filename)
             if filename:
                 name, ext = os.path.splitext(filename)
-                unique = f"{int(time.time())}_{current_user.id}{ext.lower()}"
+                unique = f"{int(pytime.time())}_{current_user.id}{ext.lower()}"
                 upload_dir = os.path.join(current_app.static_folder, "uploads")
                 file_path = os.path.join(upload_dir, unique)
                 form.photo_file.data.save(file_path)
@@ -107,7 +107,7 @@ def edit_pet(pet_id):
             filename = secure_filename(form.photo_file.data.filename)
             if filename:
                 name, ext = os.path.splitext(filename)
-                unique = f"{int(time.time())}_{current_user.id}{ext.lower()}"
+                unique = f"{int(pytime.time())}_{current_user.id}{ext.lower()}"
                 upload_dir = os.path.join(current_app.static_folder, "uploads")
                 file_path = os.path.join(upload_dir, unique)
                 form.photo_file.data.save(file_path)
