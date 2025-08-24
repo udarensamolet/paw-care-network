@@ -14,9 +14,8 @@
 
 <body>
     <header class="nav">
-        <!-- Бранд: при логнат → Dashboard; при нeлогнат → Home -->
         <a class="brand" href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('index') }}">
-            🐾 Paw Care Network
+            Paw Care Network
         </a>
 
         <nav>

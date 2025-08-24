@@ -62,7 +62,6 @@ def send_request(user_id):
 
     other = User.query.get_or_404(user_id)
 
-    # има ли вече релация между двамата (в двете посоки)?
     existing = Friendship.query.filter(
         or_(
             and_(Friendship.requester_id == current_user.id, Friendship.addressee_id == user_id),
