@@ -1,0 +1,83 @@
+/* Toast (flash) messages */
+#toast-root{
+  position: fixed;
+  top: 56px;           /* под синята лента на header-а */
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+}
+
+.toast{
+  min-width: 280px;
+  max-width: 460px;
+  background: #ffffff;
+  border: 1px solid #e7e7e7;
+  border-left: 4px solid #999;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity .18s ease, transform .18s ease;
+  word-break: break-word;
+}
+
+.toast.show{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.hide{
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.toast .toast-body{
+  display: grid;
+  gap: 4px;
+  padding-right: 6px;
+}
+
+.toast .toast-title{
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.toast .toast-text{
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+/* Close button */
+.toast .toast-close{
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: .6;
+  padding: 0 2px;
+}
+.toast .toast-close:hover{ opacity: 1; }
+
+/* Categories */
+.toast.info{
+  border-left-color: #2563eb; /* синьо */
+}
+.toast.success{
+  border-left-color: #16a34a; /* зелено */
+}
+.toast.warning{
+  border-left-color: #ea580c; /* оранжево */
+}
+.toast.error, .toast.danger{
+  border-left-color: #dc2626; /* червено */
+}

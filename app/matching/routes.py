@@ -18,29 +18,17 @@ matching_bp = Blueprint("matching", __name__, template_folder="../templates")
 
 
 class ApplyForm(FlaskForm):
-    start_at = DateTimeLocalField(
-        "I can start at", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
-    )
-    end_at = DateTimeLocalField(
-        "I can stay until", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
-    )
-    sitter_note = TextAreaField(
-        "Note to owner (optional)", validators=[Optional(), Length(max=1000)]
-    )
+    start_at = DateTimeLocalField("I can start at", format="%Y-%m-%dT%H:%M", validators=[DataRequired()])
+    end_at = DateTimeLocalField("I can stay until", format="%Y-%m-%dT%H:%M", validators=[DataRequired()])
+    sitter_note = TextAreaField("Note to owner (optional)", validators=[Optional(), Length(max=1000)])
     submit = SubmitField("Apply")
 
 
 def _are_friends(user_id_a: int, user_id_b: int) -> bool:
     q = Friendship.query.filter(
         or_(
-            and_(
-                Friendship.requester_id == user_id_a,
-                Friendship.addressee_id == user_id_b,
-            ),
-            and_(
-                Friendship.requester_id == user_id_b,
-                Friendship.addressee_id == user_id_a,
-            ),
+            and_(Friendship.requester_id == user_id_a, Friendship.addressee_id == user_id_b),
+            and_(Friendship.requester_id == user_id_b, Friendship.addressee_id == user_id_a),
         ),
         Friendship.status == "accepted",
     )
@@ -58,17 +46,12 @@ def _valid_interval(start_at, end_at) -> bool:
 @login_required
 def open_friend_requests():
     """List open care requests posted by my accepted friends (with simple pagination)."""
+    # Friends
     rels = Friendship.query.filter(
         Friendship.status == "accepted",
-        or_(
-            Friendship.requester_id == current_user.id,
-            Friendship.addressee_id == current_user.id,
-        ),
+        or_(Friendship.requester_id == current_user.id, Friendship.addressee_id == current_user.id),
     ).all()
-    friend_ids = [
-        (r.addressee_id if r.requester_id == current_user.id else r.requester_id)
-        for r in rels
-    ]
+    friend_ids = [(r.addressee_id if r.requester_id == current_user.id else r.requester_id) for r in rels]
 
     rows, has_next, has_prev, page = [], False, False, 1
     if friend_ids:
@@ -79,6 +62,7 @@ def open_friend_requests():
             .filter(CareRequest.status == "open", CareRequest.owner_id.in_(friend_ids))
             .order_by(CareRequest.start_at.asc())
         )
+        # Fetch one extra to detect "next"
         fetched = base.offset((page - 1) * per_page).limit(per_page + 1).all()
         has_next = len(fetched) > per_page
         has_prev = page > 1
@@ -118,6 +102,11 @@ def apply_request(req_id):
 
     form = ApplyForm()
 
+    # Boundaries for HTML inputs (min/max)
+    now = datetime.utcnow()
+    min_start = cr.start_at if cr.start_at > now else now
+    max_end = cr.end_at
+
     if request.method == "GET":
         form.start_at.data = cr.start_at
         form.end_at.data = cr.end_at
@@ -125,23 +114,21 @@ def apply_request(req_id):
     if form.validate_on_submit():
         start = form.start_at.data
         end = form.end_at.data
-        now = datetime.utcnow()
 
         if not _valid_interval(start, end):
             flash("End time must be after start time.", "warning")
-            return render_template("apply_request.html", form=form, req=cr)
+            return render_template("apply_request.html", form=form, req=cr, min_start=min_start, max_end=max_end)
 
         if start < now:
             flash("Start time cannot be in the past.", "warning")
-            return render_template("apply_request.html", form=form, req=cr)
+            return render_template("apply_request.html", form=form, req=cr, min_start=min_start, max_end=max_end)
 
+        # Availability must fit entirely within owner's requested window
         if not (cr.start_at <= start and end <= cr.end_at):
-            flash(
-                "Your availability must fit within the owner's requested window.",
-                "warning",
-            )
-            return render_template("apply_request.html", form=form, req=cr)
+            flash("Your availability must fit within the owner's requested window.", "warning")
+            return render_template("apply_request.html", form=form, req=cr, min_start=min_start, max_end=max_end)
 
+        # Prevent duplicate application to the same request
         existing = CareAssignment.query.filter_by(
             care_request_id=cr.id, sitter_id=current_user.id
         ).first()
@@ -149,6 +136,7 @@ def apply_request(req_id):
             flash("You have already applied for this request.", "info")
             return redirect(url_for("assignments.list_assignments"))
 
+        # Prevent overlaps with sitter's other pending/active assignments
         overlap = CareAssignment.query.filter(
             CareAssignment.sitter_id == current_user.id,
             CareAssignment.status.in_(["pending", "active"]),
@@ -156,11 +144,8 @@ def apply_request(req_id):
             CareAssignment.end_at > start,
         ).first()
         if overlap:
-            flash(
-                "You already have another assignment overlapping these times.",
-                "warning",
-            )
-            return render_template("apply_request.html", form=form, req=cr)
+            flash("You already have another assignment overlapping these times.", "warning")
+            return render_template("apply_request.html", form=form, req=cr, min_start=min_start, max_end=max_end)
 
         a = CareAssignment(
             care_request_id=cr.id,
@@ -176,4 +161,4 @@ def apply_request(req_id):
         flash("Applied. The owner will review your application.", "success")
         return redirect(url_for("assignments.list_assignments"))
 
-    return render_template("apply_request.html", form=form, req=cr)
+    return render_template("apply_request.html", form=form, req=cr, min_start=min_start, max_end=max_end)

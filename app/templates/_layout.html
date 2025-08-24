@@ -8,6 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <meta name="theme-color" content="#F5E6D3">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/flash.css') }}">
 </head>
 
 <body>
@@ -29,21 +30,58 @@
     </header>
 
     <main class="main">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div class="flashes">
-            {% for category, message in messages %}
-            <div class="flash {{ category }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        {% endwith %}
         {% block content %}{% endblock %}
     </main>
 
     <footer class="footer">
         © {{ current_year }} Paw Care Network | Built by udarensamolet
     </footer>
+
+    {# Toasts: красиви flash съобщения под header-а #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div id="toast-root" aria-live="polite" aria-atomic="true">
+        {% for category, message in messages %}
+        <div class="toast {{ (category or 'info')|lower }}" role="alert" data-timeout="4500">
+            <div class="toast-body">
+                <strong class="toast-title">
+                    {% if (category or '').lower() == 'success' %}Success{% elif (category or '').lower() in ['error','danger'] %}Error{% elif (category or '').lower() == 'warning' %}Warning{% else %}Info{% endif %}
+                </strong>
+                <div class="toast-text">{{ message }}</div>
+            </div>
+            <button class="toast-close" aria-label="Close" title="Close">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <script>
+        (function () {
+            var root = document.getElementById('toast-root');
+            if (!root) return;
+
+            function dismiss(el) {
+                el.classList.add('hide');
+                setTimeout(function () {
+                    el.remove();
+                }, 250);
+            }
+            root.querySelectorAll('.toast').forEach(function (el, idx) {
+                setTimeout(function () {
+                    el.classList.add('show');
+                }, 30 + idx * 40);
+                var t = setTimeout(function () {
+                    dismiss(el);
+                }, parseInt(el.dataset.timeout || '4500', 10));
+                var btn = el.querySelector('.toast-close');
+                if (btn) btn.addEventListener('click', function () {
+                    clearTimeout(t);
+                    dismiss(el);
+                });
+            });
+        })();
+    </script>
 </body>
 
 </html>

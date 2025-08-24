@@ -9,6 +9,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
+    # Ensure upload dir exists
     os.makedirs(os.path.join(app.static_folder, "uploads"), exist_ok=True)
 
     db.init_app(app)
@@ -17,28 +18,36 @@ def create_app():
     csrf.init_app(app)
     login_manager.login_view = "auth.login"
 
+    # Import models to register with SQLAlchemy
     from .models.user import User
     from .models.social import Friendship
     from .models.pet import Pet
     from .models.care import CareRequest
     from .models.assignment import CareAssignment
 
+    # Blueprints
     from .auth.routes import auth_bp
+
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     from .social.routes import social_bp
+
     app.register_blueprint(social_bp, url_prefix="/social")
 
     from .pets.routes import pets_bp
+
     app.register_blueprint(pets_bp)
 
     from .schedule.routes import schedule_bp
+
     app.register_blueprint(schedule_bp)
 
     from .matching.routes import matching_bp
+
     app.register_blueprint(matching_bp)
 
     from .assignments.routes import assignments_bp
+
     app.register_blueprint(assignments_bp)
 
     @app.get("/")
@@ -50,6 +59,7 @@ def create_app():
     def dashboard():
         from sqlalchemy import or_
 
+        # Friends of current user
         rels = Friendship.query.filter(
             Friendship.status == "accepted",
             or_(
@@ -67,16 +77,18 @@ def create_app():
             "open_requests": CareRequest.query.filter_by(
                 owner_id=current_user.id, status="open"
             ).count(),
+            # Only active and not yet passed
             "sitter_assignments": CareAssignment.query.filter(
                 CareAssignment.sitter_id == current_user.id,
                 CareAssignment.status == "active",
-                CareAssignment.end_at >= datetime.utcnow()
+                CareAssignment.end_at >= datetime.utcnow(),
             ).count(),
             "friends_open_reqs": (
                 CareRequest.query.filter(
                     CareRequest.status == "open", CareRequest.owner_id.in_(friend_ids)
                 ).count()
-                if friend_ids else 0
+                if friend_ids
+                else 0
             ),
             "pending_approvals": (
                 CareAssignment.query.join(
@@ -118,6 +130,13 @@ def create_app():
             except Exception:
                 return ""
 
+        def fmt_dt(dt):
+            """YYYY-MM-DD HH:MM for human-readable date-time."""
+            try:
+                return dt.strftime("%Y-%m-%d %H:%M")
+            except Exception:
+                return ""
+
         def static_filename(path):
             """
             Normalize a stored path to be used with url_for('static', filename=...).
@@ -128,14 +147,15 @@ def create_app():
                 return None
             p = str(path)
             if p.startswith("/static/"):
-                return p[len("/static/"):]
+                return p[len("/static/") :]
             return p
 
         return dict(
             friendly_name=friendly_name,
             fmt_date=fmt_date,
+            fmt_dt=fmt_dt,
             static_filename=static_filename,
-            current_year=datetime.utcnow().year
+            current_year=datetime.utcnow().year,
         )
 
     return app

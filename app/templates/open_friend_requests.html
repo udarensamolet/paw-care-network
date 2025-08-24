@@ -16,7 +16,7 @@
                         {{ r.pet.name if r.pet else "?" }}
                     </div>
                     <div class="muted" style="margin-top:2px">
-                        {{ fmt_date(r.start_at) }} → {{ fmt_date(r.end_at) }}
+                        {{ fmt_dt(r.start_at) }} → {{ fmt_dt(r.end_at) }}
                     </div>
                     {% if r.note %}
                     <div class="help" style="margin-top:4px;max-width:70ch">

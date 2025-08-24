@@ -9,15 +9,24 @@
             — owner: {{ friendly_name(req.owner) if req.owner else req.owner_id }}
             — pet: {{ req.pet.name if req.pet else "?" }}
         </div>
+
         <div class="help" style="margin-bottom:12px">
-            Requested window: {{ req.start_at }} → {{ req.end_at }}
+            Requested window:
+            <strong>{{ fmt_dt(req.start_at) }}</strong> → <strong>{{ fmt_dt(req.end_at) }}</strong>.
+            Your availability must be entirely within this window.
         </div>
 
         <form method="post">
             {{ form.csrf_token }}
             <div class="form-row">
                 <label for="{{ form.start_at.id }}">I can start at</label>
-                {{ form.start_at(type="datetime-local", class="input") }}
+                {{ form.start_at(
+            type="datetime-local",
+            class="input",
+            min=min_start.strftime('%Y-%m-%dT%H:%M'),
+            max=max_end.strftime('%Y-%m-%dT%H:%M'),
+            placeholder="YYYY-MM-DDTHH:MM"
+        ) }}
                 {% if form.start_at.errors %}
                 <div class="error">{{ form.start_at.errors[0] }}</div>
                 {% endif %}
@@ -25,7 +34,13 @@
 
             <div class="form-row">
                 <label for="{{ form.end_at.id }}">I can stay until</label>
-                {{ form.end_at(type="datetime-local", class="input") }}
+                {{ form.end_at(
+            type="datetime-local",
+            class="input",
+            min=min_start.strftime('%Y-%m-%dT%H:%M'),
+            max=max_end.strftime('%Y-%m-%dT%H:%M'),
+            placeholder="YYYY-MM-DDTHH:MM"
+        ) }}
                 {% if form.end_at.errors %}
                 <div class="error">{{ form.end_at.errors[0] }}</div>
                 {% endif %}
@@ -33,7 +48,7 @@
 
             <div class="form-row">
                 <label for="{{ form.sitter_note.id }}">Note to owner (optional)</label>
-                {{ form.sitter_note(class="textarea", rows="4") }}
+                {{ form.sitter_note(class="textarea", rows="4", placeholder="Any notes (e.g., key pick-up, meds, etc.)") }}
                 {% if form.sitter_note.errors %}
                 <div class="error">{{ form.sitter_note.errors[0] }}</div>
                 {% endif %}
@@ -44,6 +59,10 @@
                 {{ form.submit(class="btn") }}
             </div>
         </form>
+
+        <div class="muted" style="margin-top:10px">
+            Tip: Start time cannot be in the past; end must be after start.
+        </div>
     </div>
 </div>
 {% endblock %}
